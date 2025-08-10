@@ -18,3 +18,4 @@ type GetServerScriptGetByIdOption = sdk.GetServerScriptGetByIdOption
 type CreateShellUserOptions = sdk.CreateShellUserOptions
 type UpdateServerShellUserOptions = sdk.UpdateServerShellUserOptions
 type UpdateServerOptions = sdk.UpdateServerOptions
+type WebdockOptions = sdk.WebdockOptions
