@@ -9,17 +9,13 @@ import (
 	"net/url"
 )
 
-// WarningDTO represents a warning in the dry run response
 type WarningDTO struct {
 	Type    string      `json:"type"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
 
-// ChargeSummaryItemDTO represents an individual charge item
 type ChargeSummaryItemDTO struct {
-	// Add specific fields based on your API response structure
-	// This is a placeholder - you'll need to fill in the actual fields
 	Description string  `json:"description,omitempty"`
 	Amount      float64 `json:"amount,omitempty"`
 	Currency    string  `json:"currency,omitempty"`

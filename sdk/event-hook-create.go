@@ -16,7 +16,7 @@ type HookFilterDTO struct {
 }
 
 // CreateEventHookRequest represents the request body for creating an event hook
-type CreateEventHookRequest struct {
+type CreateEventHookOptions struct {
 	CallbackUrl string  `json:"callbackUrl"`
 	CallbackId  *string `json:"callbackId,omitempty"`
 	EventType   *string `json:"eventType,omitempty"`
@@ -29,18 +29,14 @@ type CreateEventHookResponse struct {
 	Filters     []HookFilterDTO `json:"filters"`
 }
 
-func (w *Webdock) CreateEventHook(callbackUrl string, callbackId *string, eventType *string) (CreateEventHookResponse, error) {
+func (w *Webdock) CreateEventHook(opts CreateEventHookOptions) (CreateEventHookResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
 		Path:   "/v1/hooks",
 	}
 
-	requestBody := CreateEventHookRequest{
-		CallbackUrl: callbackUrl,
-		CallbackId:  callbackId,
-		EventType:   eventType,
-	}
+	requestBody := opts
 
 	data, err := json.Marshal(requestBody)
 	if err != nil {
