@@ -22,23 +22,26 @@ go get github.com/webdock-io/go-sdk
 package main
 
 import (
-    "fmt"
-    "log"
-    
-    webdock "github.com/webdock-io/go-sdk"
+	"fmt"
+	"log"
+
+	webdock "github.com/webdock-io/go-sdk"
 )
 
 func main() {
-    client := webdock.NewClient("your-api-token")
-    
-    // Example usage
-    servers, err := client.GetServers()
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("Found %d servers\n", len(servers))
+	client := webdock.New(webdock.WebdockOptions{
+		TOKEN: "Token",
+	})
+
+	// Example usage
+	servers, err := client.ListServers(webdock.ActiveServers)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d servers\n", len(servers))
 }
+
 ```
 
 
