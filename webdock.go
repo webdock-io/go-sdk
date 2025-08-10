@@ -1,21 +1,42 @@
-package main
+package gosdk
 
 import (
-	sdk "github.com/webdock-io/go-sdk/sdk"
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+	"net/url"
 )
 
-var New = sdk.New
+type Webdock struct {
+	Token         string
+	Authorization string
+	BASE_URL      string
+	client        *http.Client
+}
 
-type CreatePublicKeyOptions = sdk.CreatePublicKeyOptions
-type CreateAccountScriptOptions = sdk.CreateAccountScriptOptions
-type AccountScriptUpdateOptions = sdk.AccountScriptUpdateOptions
-type CreateEventHookOptions = sdk.CreateEventHookOptions
-type ListProfilesOptions = sdk.ListProfilesOptions
-type GetProfilesOptions = sdk.GetProfilesOptions
-type ListServersQuery = sdk.ListServersQuery
-type CreateServerScriptOptions = sdk.CreateServerScriptOptions
-type GetServerScriptGetByIdOption = sdk.GetServerScriptGetByIdOption
-type CreateShellUserOptions = sdk.CreateShellUserOptions
-type UpdateServerShellUserOptions = sdk.UpdateServerShellUserOptions
-type UpdateServerOptions = sdk.UpdateServerOptions
-type WebdockOptions = sdk.WebdockOptions
+func (w *Webdock) GetFormatedToken() string {
+	return fmt.Sprintf("Bearer %s", w.Token)
+
+}
+
+func (w *Webdock) GetFormatedURL(p string) string {
+	apiURL, err := url.JoinPath(w.BASE_URL, p)
+	if err != nil {
+		log.Fatal(errors.New("failed to build API URL"))
+	}
+	return apiURL
+}
+
+type WebdockOptions struct {
+	TOKEN string
+}
+
+func New(opts WebdockOptions) Webdock {
+	return Webdock{
+		Token:         opts.TOKEN,
+		Authorization: "Authorization",
+		BASE_URL:      "api.webdock.io",
+		client:        &http.Client{},
+	}
+}
