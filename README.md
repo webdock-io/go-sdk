@@ -2,13 +2,7 @@
 
 A Go SDK library and wrapper for the [Webdock API](https://webdock.io/).
 
-## ⚠️ Development Status
-
-**This SDK is currently under active development and is not yet stable.**
-
-- **Do not use in production** until `v1.0.0` is released
-- Use at your own risk for development and testing purposes only
-- Breaking changes may occur between releases
+You can find the full documentation at https://pkg.go.dev/github.com/webdock-io/go-sdk
 
 ## Installation
 
@@ -30,7 +24,7 @@ import (
 
 func main() {
 	client := webdock.New(webdock.WebdockOptions{
-		TOKEN: "Token",
+		TOKEN: "your-api-token-here",
 	})
 
 	// Example usage
@@ -41,10 +35,7 @@ func main() {
 
 	fmt.Printf("Found %d servers\n", len(servers))
 }
-
 ```
-
-
 ## Documentation
 
-Full documentation will be available once the SDK reaches stable release.
+Full documentation is available at [pkg.go.dev](https://pkg.go.dev/github.com/webdock-io/go-sdk).
