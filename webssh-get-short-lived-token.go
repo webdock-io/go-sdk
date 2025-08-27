@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -17,15 +17,20 @@ type WebsshTokenResponse struct {
 	Token string `json:"token"`
 }
 
-func (w *Webdock) CreateShortLivedWebsshToken(serverSlug, username string) (WebsshTokenResponse, error) {
+type CreateShortLivedWebsshTokenOptions struct {
+	ServerSlug string
+	Username   string
+}
+
+func (w *Webdock) CreateShortLivedWebsshToken(options CreateShortLivedWebsshTokenOptions) (WebsshTokenResponse, error) {
 	API_URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("v1/servers/%s/shellUsers/WebsshToken", serverSlug),
+		Path:   fmt.Sprintf("v1/servers/%s/shellUsers/WebsshToken", options.ServerSlug),
 	}
 
 	requestBody := WebsshTokenRequest{
-		Username: username,
+		Username: options.Username,
 	}
 
 	jsonBody, err := json.Marshal(requestBody)

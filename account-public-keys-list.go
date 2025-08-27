@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -14,8 +14,10 @@ type PublicKey struct {
 	Key     string `json:"key"`
 	Created string `json:"created"`
 }
+type ListAccountPublicKeysOptions struct {
+}
 
-func (w *Webdock) ListAccountPublicKeys() ([]PublicKey, error) {
+func (w *Webdock) ListAccountPublicKeys(options ListAccountPublicKeysOptions) ([]PublicKey, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

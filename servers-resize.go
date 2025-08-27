@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -12,16 +12,20 @@ import (
 type ResizeServerRequest struct {
 	ProfileSlug string `json:"profileSlug"`
 }
+type ResizeServersOptions struct {
+	Slug        string
+	ProfileSlug string
+}
 
-func (w *Webdock) ResizeServers(slug string, profileSlug string) (string, error) {
+func (w *Webdock) ResizeServer(options ResizeServersOptions) (string, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("v1/servers/%s/actions/resize", slug),
+		Path:   fmt.Sprintf("v1/servers/%s/actions/resize", options.Slug),
 	}
 
 	requestBody := ResizeServerRequest{
-		ProfileSlug: profileSlug,
+		ProfileSlug: options.ProfileSlug,
 	}
 
 	jsonBody, err := json.Marshal(requestBody)

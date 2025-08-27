@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -9,11 +9,15 @@ import (
 	"strconv"
 )
 
-func (w *Webdock) DeleteEventHook(hookId int64) error {
+type DeleteEventHookOptions struct {
+	HookID int64
+}
+
+func (w *Webdock) DeleteEventHook(options DeleteEventHookOptions) error {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/hooks/%s", strconv.FormatInt(hookId, 10)),
+		Path:   fmt.Sprintf("/v1/hooks/%s", strconv.FormatInt(options.HookID, 10)),
 	}
 
 	req, err := http.NewRequest("DELETE", URL.String(), nil)

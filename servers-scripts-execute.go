@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -13,11 +13,16 @@ type ExecuteServerScriptResponse struct {
 	CallbackID string `json:"X-Callback-ID"` // From X-Callback-ID header
 }
 
-func (w *Webdock) ExecuteServerScript(serverSlug string, scriptId int) (ExecuteServerScriptResponse, error) {
+type ExecuteServerScriptOptions struct {
+	ServerSlug string
+	ScriptId   int
+}
+
+func (w *Webdock) ExecuteServerScript(options ExecuteServerScriptOptions) (ExecuteServerScriptResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/scripts/%s/execute", serverSlug, strconv.Itoa(scriptId)),
+		Path:   fmt.Sprintf("/v1/servers/%s/scripts/%s/execute", options.ServerSlug, strconv.Itoa(options.ScriptId)),
 	}
 
 	req, err := http.NewRequest("POST", URL.String(), nil)

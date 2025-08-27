@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -9,18 +9,23 @@ import (
 	"net/url"
 )
 
+type ReinstallServerOptions struct {
+	Slug      string
+	ImageSlug string
+}
+
 /*
-retruns (operation_id, error)
+returns (operation_id, error)
 */
-func (w *Webdock) ReinstallServers(slug string, imageSlug string) (string, error) {
+func (w *Webdock) ReinstallServer(options ReinstallServerOptions) (string, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`v1/servers/%s/actions/reinstall`, slug),
+		Path:   fmt.Sprintf(`v1/servers/%s/actions/reinstall`, options.Slug),
 	}
 
 	reqBody := map[string]string{
-		imageSlug: imageSlug,
+		"imageSlug": options.ImageSlug,
 	}
 
 	data, err := json.Marshal(reqBody)

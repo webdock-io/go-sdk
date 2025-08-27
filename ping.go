@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -13,7 +13,9 @@ type PingBodyResponse struct {
 	Webdock string `json:"webdock"`
 }
 
-func (w *Webdock) Ping() (PingBodyResponse, error) {
+type PingOptions struct{}
+
+func (w *Webdock) Ping(options PingOptions) (PingBodyResponse, error) {
 
 	const URL_PATH = "ping"
 	URL, err := url.JoinPath(w.BASE_URL, URL_PATH)

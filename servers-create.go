@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"net/url"
 )
 
-type CreateServersFromSnapshotOptions struct {
+type CreateServerFromSnapshotOptions struct {
 	Name        string `json:"name"`
 	LocationId  string `json:"locationId"`
 	ProfileSlug string `json:"profileSlug"`
@@ -18,7 +18,7 @@ type CreateServersFromSnapshotOptions struct {
 
 // You can blame Arni for not being able to pass the slug
 // arni@webdock.io
-type CreateServerFromImageSlugOptions struct {
+type CreateServerFromImageOptions struct {
 	Name        string `json:"name"`
 	LocationId  string `json:"locationId"`
 	ProfileSlug string `json:"profileSlug"`
@@ -29,7 +29,7 @@ type CreatedServer struct {
 	CallbackID string `json:"X-Callback-ID"`
 }
 
-func (w *Webdock) CreateServersFromSnapshot(ops CreateServersFromSnapshotOptions) (CreatedServer, error) {
+func (w *Webdock) CreateServerFromSnapshot(ops CreateServerFromSnapshotOptions) (CreatedServer, error) {
 
 	apiURL := url.URL{
 		Scheme: "https",
@@ -70,7 +70,7 @@ func (w *Webdock) CreateServersFromSnapshot(ops CreateServersFromSnapshotOptions
 	}, nil
 }
 
-func (w *Webdock) ServersCreateFromImage(ops CreateServerFromImageSlugOptions) (CreatedServer, error) {
+func (w *Webdock) CreateServerFromImage(ops CreateServerFromImageOptions) (CreatedServer, error) {
 
 	apiURL := url.URL{
 		Scheme: "https",

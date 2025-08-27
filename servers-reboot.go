@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -8,14 +8,18 @@ import (
 	"net/url"
 )
 
+type RebootServerOptions struct {
+	Slug string
+}
+
 /*
-retruns (operation_id, error)
+returns (operation_id, error)
 */
-func (w *Webdock) RebootServer(slug string) (string, error) {
+func (w *Webdock) RebootServer(options RebootServerOptions) (string, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`v1/servers/%s/actions/reboot`, slug),
+		Path:   fmt.Sprintf(`v1/servers/%s/actions/reboot`, options.Slug),
 	}
 
 	req, err := http.NewRequest("POST", URL.String(), nil)

@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -34,16 +34,22 @@ type Response struct {
 	Snapshot
 }
 
-func (w *Webdock) TakeServerSnapshot(serverSlug string, name string) (Response, error) {
+type TakeServerSnapshotOptions struct {
+	ServerSlug string
+	Name       string
+}
+
+func (w *Webdock) TakeServerSnapshot(options TakeServerSnapshotOptions) (Response, error) {
 
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`/v1/servers/%s/actions/snapshot`, serverSlug),
+		Path:   fmt.Sprintf(`/v1/servers/%s/actions/snapshot`, options.ServerSlug),
 	}
 
 	jsonBody := map[string]string{
-		"serverSlug": serverSlug,
+		"serverSlug": options.ServerSlug,
+		"name":       options.Name,
 	}
 	data, err := json.Marshal(jsonBody)
 	if err != nil {

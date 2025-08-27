@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ type WebdockError struct {
 	ID      int16  `json:"id"`
 	Message string `json:"message"`
 }
-type CreateShellUserOptions struct {
+type CreateServerShellUserOptions struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	// Default: "sudo"
@@ -29,7 +29,7 @@ type CreatedShellUser struct {
 	CallbackID string    `json:"X-Callback-ID"`
 }
 
-func (w *Webdock) CreateServerShellUser(opts CreateShellUserOptions) (CreatedShellUser, error) {
+func (w *Webdock) CreateServerShellUser(opts CreateServerShellUserOptions) (CreatedShellUser, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

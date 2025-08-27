@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -8,12 +8,16 @@ import (
 	"net/url"
 )
 
-func (w *Webdock) GetServerBySlug(slug string) (Server, error) {
+type GetServerBySlugOptions struct {
+	Slug string
+}
+
+func (w *Webdock) GetServerBySlug(options GetServerBySlugOptions) (Server, error) {
 
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("v1/servers/%s", slug),
+		Path:   fmt.Sprintf("v1/servers/%s", options.Slug),
 	}
 	req, err := http.NewRequest("GET", URL.String(), nil)
 	req.Header.Set(w.Authorization, w.GetFormatedToken())

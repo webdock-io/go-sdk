@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -15,7 +15,9 @@ type Image struct {
 	PHPVersion *string `json:"phpVersion"`
 }
 
-func (w *Webdock) ListOSImages() ([]Image, error) {
+type ListOSImagesOptions struct{}
+
+func (w *Webdock) ListOSImages(options ListOSImagesOptions) ([]Image, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

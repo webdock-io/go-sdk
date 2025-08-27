@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -9,11 +9,15 @@ import (
 	"strconv"
 )
 
-func (w *Webdock) DeletePublicKey(id int64) error {
+type DeletePublicOptions struct {
+	ID int64
+}
+
+func (w *Webdock) DeletePublicKey(options DeletePublicOptions) error {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   "v1/account/publicKeys/" + strconv.FormatInt(id, 10),
+		Path:   "v1/account/publicKeys/" + strconv.FormatInt(options.ID, 10),
 	}
 
 	req, err := http.NewRequest("DELETE", apiURL.String(), nil)

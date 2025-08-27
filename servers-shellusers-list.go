@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -23,12 +23,15 @@ type ShellUser struct {
 	PublicKeys []PublicKeyDTO `json:"publicKeys"`
 	Created    string         `json:"created"`
 }
+type ListServerShellUserOptions struct {
+	ServerSlug string
+}
 
-func (w *Webdock) ListServerShellUser(serverSlug string) ([]ShellUser, error) {
+func (w *Webdock) ListServerShellUser(options ListServerShellUserOptions) ([]ShellUser, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   "v1/servers/" + serverSlug + "/shellUsers",
+		Path:   "v1/servers/" + options.ServerSlug + "/shellUsers",
 	}
 
 	req, err := http.NewRequest("GET", apiURL.String(), nil)

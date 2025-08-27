@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -14,11 +14,11 @@ type Profile struct {
 	Description string `json:"description"`
 }
 
-type ListProfilesOptions struct {
+type ListPossibleProfilesForServerOptions struct {
 	LocationID string `json:"locationId"`
 }
 
-func (w *Webdock) ListPossibleProfilesForServer(opts ListProfilesOptions) ([]Profile, error) {
+func (w *Webdock) ListPossibleProfilesForServer(opts ListPossibleProfilesForServerOptions) ([]Profile, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

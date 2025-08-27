@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -13,11 +13,16 @@ type DeleteServerSnapshotResponse struct {
 	CallbackID string `json:"-"`
 }
 
-func (w *Webdock) DeleteServerSnapshot(serverSlug string, snapshotId int64) (DeleteServerSnapshotResponse, error) {
+type DeleteServerSnapshotOptions struct {
+	ServerSlug string
+	SnapshotId int64
+}
+
+func (w *Webdock) DeleteServerSnapshot(options DeleteServerSnapshotOptions) (DeleteServerSnapshotResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/snapshots/%s", serverSlug, strconv.FormatInt(snapshotId, 10)),
+		Path:   fmt.Sprintf("/v1/servers/%s/snapshots/%s", options.ServerSlug, strconv.FormatInt(options.SnapshotId, 10)),
 	}
 
 	req, err := http.NewRequest("DELETE", URL.String(), nil)

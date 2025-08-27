@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 const (
 	Provisioning ServerState = "provisioning"

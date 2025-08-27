@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -9,12 +9,12 @@ import (
 	"strconv"
 )
 
-type GetServerScriptGetByIdOption struct {
+type GetServerScriptGetByIdOptions struct {
 	ServerSlug string `json:"serverSlug"`
 	ScriptId   int    `json:"scriptId"`
 }
 
-func (w *Webdock) GetServerScriptGetById(opts GetServerScriptGetByIdOption) (AccountScriptDTO, error) {
+func (w *Webdock) GetServerScriptGetById(opts GetServerScriptGetByIdOptions) (AccountScriptDTO, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -18,7 +18,10 @@ type AccountScriptDTO struct {
 
 type AccountScriptsListResponse []AccountScriptDTO
 
-func (w *Webdock) ListAccountScripts() (AccountScriptsListResponse, error) {
+type ListAccountScriptsOptions struct {
+}
+
+func (w *Webdock) ListAccountScripts(options ListAccountScriptsOptions) (AccountScriptsListResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

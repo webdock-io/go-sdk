@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -8,12 +8,12 @@ import (
 	"net/url"
 )
 
-type GetProfilesOptions struct {
+type GetCustomProfileSpecsOptions struct {
 	LocationID  string `json:"locationId,omitempty"`
 	ProfileSlug string `json:"profileSlug,omitempty"`
 }
 
-func (w *Webdock) GetCustomProfileSpecs(opts GetProfilesOptions) (Profile, error) {
+func (w *Webdock) GetCustomProfileSpecs(opts GetCustomProfileSpecsOptions) (Profile, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

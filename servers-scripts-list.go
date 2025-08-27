@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -19,11 +19,15 @@ type ServerScriptDTO struct {
 
 type GetServerScriptsResponse []ServerScriptDTO
 
-func (w *Webdock) ListServersScripts(serverSlug string) (GetServerScriptsResponse, error) {
+type GetServerScriptsOptions struct {
+	ServerSlug string
+}
+
+func (w *Webdock) ListServersScripts(options GetServerScriptsOptions) (GetServerScriptsResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/scripts", serverSlug),
+		Path:   fmt.Sprintf("/v1/servers/%s/scripts", options.ServerSlug),
 	}
 
 	req, err := http.NewRequest("GET", URL.String(), nil)

@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -9,11 +9,16 @@ import (
 	"strconv"
 )
 
-func (w *Webdock) GetServerSnapshotById(serverSlug string, snapshotId int64) (Snapshot, error) {
+type GetServerSnapshotByIdOptions struct {
+	ServerSlug string
+	SnapshotId int64
+}
+
+func (w *Webdock) GetServerSnapshotById(options GetServerSnapshotByIdOptions) (Snapshot, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/snapshots/%s", serverSlug, strconv.FormatInt(snapshotId, 10)),
+		Path:   fmt.Sprintf("/v1/servers/%s/snapshots/%s", options.ServerSlug, strconv.FormatInt(options.SnapshotId, 10)),
 	}
 
 	req, err := http.NewRequest("GET", URL.String(), nil)

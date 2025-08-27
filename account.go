@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -21,7 +21,10 @@ type AccountInformation struct {
 	AccountBalanceCurrency string `json:"accountBalanceCurrency"`
 }
 
-func (w *Webdock) GetAccountInfo() (AccountInformation, error) {
+type GetAccountInfoOptions struct {
+}
+
+func (w *Webdock) GetAccountInfo(options GetAccountInfoOptions) (AccountInformation, error) {
 
 	apiURL := w.GetFormatedURL("account/accountInformation")
 

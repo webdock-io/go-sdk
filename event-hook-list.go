@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -16,7 +16,9 @@ type EventHookDTO struct {
 
 type ListEventHooksResponse []EventHookDTO
 
-func (w *Webdock) ListEventHooks() (ListEventHooksResponse, error) {
+type ListEventHooksOptions struct{}
+
+func (w *Webdock) ListEventHooks(options ListEventHooksOptions) (ListEventHooksResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

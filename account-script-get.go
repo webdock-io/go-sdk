@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -9,11 +9,15 @@ import (
 	"strconv"
 )
 
-func (w *Webdock) GetAccountScriptById(scriptId int64) (AccountScriptDTO, error) {
+type GetAccountScriptByIdOptions struct {
+	ScriptID int64
+}
+
+func (w *Webdock) GetAccountScriptById(options GetAccountScriptByIdOptions) (AccountScriptDTO, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/account/scripts/%s", strconv.FormatInt(scriptId, 10)),
+		Path:   fmt.Sprintf("/v1/account/scripts/%s", strconv.FormatInt(options.ScriptID, 10)),
 	}
 
 	req, err := http.NewRequest("GET", URL.String(), nil)

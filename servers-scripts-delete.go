@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -13,11 +13,16 @@ type DeleteServerScriptResponse struct {
 	CallbackID string `json:"X-Callback-ID"` // From X-Callback-ID header
 }
 
-func (w *Webdock) DeleteServerScript(serverSlug string, scriptId int) (DeleteServerScriptResponse, error) {
+type DeleteServerScriptOptions struct {
+	ServerSlug string
+	ScriptId   int
+}
+
+func (w *Webdock) DeleteServerScript(options DeleteServerScriptOptions) (DeleteServerScriptResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/scripts/%s", serverSlug, strconv.Itoa(scriptId)),
+		Path:   fmt.Sprintf("/v1/servers/%s/scripts/%s", options.ServerSlug, strconv.Itoa(options.ScriptId)),
 	}
 
 	req, err := http.NewRequest("DELETE", URL.String(), nil)

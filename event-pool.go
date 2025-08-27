@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -22,12 +22,19 @@ type EventDTO struct {
 	Message    string  `json:"message"`
 }
 
-type GetEventsResponse struct {
+type ListEventsResponse struct {
 	Events     []EventDTO `json:"-"`
 	TotalCount int32      `json:"-"` // From X-Total-Count header
 }
 
-func (w *Webdock) GetEvents(callbackId *string, eventType *string, page *int64, perPage *int64) (GetEventsResponse, error) {
+type ListEventsOptions struct {
+	CallbackId *string
+	EventType  *string
+	Page       *int64
+	PerPage    *int64
+}
+
+func (w *Webdock) ListEvents(options ListEventsOptions) (ListEventsResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
@@ -35,15 +42,16 @@ func (w *Webdock) GetEvents(callbackId *string, eventType *string, page *int64, 
 	}
 
 	q := URL.Query()
-	if callbackId != nil {
-		q.Set("callbackId", *callbackId)
+	if options.CallbackId != nil {
+		q.Set("callbackId", *options.CallbackId)
 	}
-	if eventType != nil {
-		q.Set("eventType", *eventType)
+	if options.EventType != nil {
+		q.Set("eventType", *options.EventType)
 	}
-	if page != nil {
-		q.Set("page", strconv.FormatInt(*page, 10))
+	if options.Page != nil {
+		q.Set("page", strconv.FormatInt(*options.Page, 10))
 	}
+	perPage := options.PerPage
 	if perPage != nil {
 		q.Set("per_page", strconv.FormatInt(*perPage, 10))
 	}
@@ -54,17 +62,17 @@ func (w *Webdock) GetEvents(callbackId *string, eventType *string, page *int64, 
 	req.Header.Set("Content-Type", "application/json")
 
 	if err != nil {
-		return GetEventsResponse{}, fmt.Errorf("error creating request: %w", err)
+		return ListEventsResponse{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	res, err := w.client.Do(req)
 	if err != nil {
-		return GetEventsResponse{}, fmt.Errorf("operation failed: %w", err)
+		return ListEventsResponse{}, fmt.Errorf("operation failed: %w", err)
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return GetEventsResponse{}, fmt.Errorf("failed to read response: %w", err)
+		return ListEventsResponse{}, fmt.Errorf("failed to read response: %w", err)
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -74,15 +82,15 @@ func (w *Webdock) GetEvents(callbackId *string, eventType *string, page *int64, 
 		}
 		err = json.Unmarshal(body, &webdock)
 		if err != nil {
-			return GetEventsResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
+			return ListEventsResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
 		}
-		return GetEventsResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
+		return ListEventsResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
 	}
 
 	fmt.Println(string(body))
 	var events []EventDTO
 	if err := json.Unmarshal(body, &events); err != nil {
-		return GetEventsResponse{}, fmt.Errorf("error decoding response: %w", err)
+		return ListEventsResponse{}, fmt.Errorf("error decoding response: %w", err)
 	}
 
 	// Extract total count from header
@@ -94,7 +102,7 @@ func (w *Webdock) GetEvents(callbackId *string, eventType *string, page *int64, 
 		}
 	}
 
-	response := GetEventsResponse{
+	response := ListEventsResponse{
 		Events:     events,
 		TotalCount: totalCount,
 	}

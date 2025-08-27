@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -13,11 +13,16 @@ type DeleteShellUserResponse struct {
 	CallbackID string `json:"callbackId"`
 }
 
-func (w *Webdock) DeleteShellUser(serverSlug string, shellUserId int64) (DeleteShellUserResponse, error) {
+type DeleteShellUserOptions struct {
+	ServerSlug  string
+	ShellUserId int64
+}
+
+func (w *Webdock) DeleteShellUser(options DeleteShellUserOptions) (DeleteShellUserResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`/v1/servers/%s/shellUsers/%s`, serverSlug, strconv.FormatInt(shellUserId, 10)),
+		Path:   fmt.Sprintf(`/v1/servers/%s/shellUsers/%s`, options.ServerSlug, strconv.FormatInt(options.ShellUserId, 10)),
 	}
 
 	req, err := http.NewRequest("DELETE", URL.String(), nil)

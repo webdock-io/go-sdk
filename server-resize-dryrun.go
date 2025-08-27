@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -41,15 +41,20 @@ type ResizeDryRunRequest struct {
 	ProfileSlug string `json:"profileSlug"`
 }
 
-func (w *Webdock) DryRunResizeServer(serverSlug string, profileSlug string) (ResizeDryRunResponse, error) {
+type DryRunResizeServerOptions struct {
+	ServerSlug  string
+	ProfileSlug string
+}
+
+func (w *Webdock) DryRunResizeServer(options DryRunResizeServerOptions) (ResizeDryRunResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`/v1/servers/%s/actions/resize/dryrun`, serverSlug),
+		Path:   fmt.Sprintf(`/v1/servers/%s/actions/resize/dryrun`, options.ServerSlug),
 	}
 
 	requestBody := ResizeDryRunRequest{
-		ProfileSlug: profileSlug,
+		ProfileSlug: options.ProfileSlug,
 	}
 
 	data, err := json.Marshal(requestBody)

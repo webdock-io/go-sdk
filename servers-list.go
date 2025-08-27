@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -16,12 +16,16 @@ const (
 	ActiveServers   ListServersQuery = "active"
 )
 
-func (w *Webdock) ListServers(status ListServersQuery) (ListServers, error) {
+type ListServerOptions struct {
+	Status ListServersQuery
+}
+
+func (w *Webdock) ListServer(options ListServerOptions) (ListServers, error) {
 	API_URL := url.URL{
 		Scheme:   "https",
 		Host:     w.BASE_URL,
 		Path:     "v1/servers",
-		RawQuery: fmt.Sprintf("status=%s", status),
+		RawQuery: fmt.Sprintf("status=%s", options.Status),
 	}
 
 	req, err := http.NewRequest("GET", API_URL.String(), nil)

@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -9,16 +9,21 @@ import (
 	"net/url"
 )
 
-func (w *Webdock) RestoreServerSnapshot(serverSlug string, snapshotId string) (string, error) {
+type RestoreServerSnapshotOptions struct {
+	ServerSlug string
+	SnapshotId string
+}
+
+func (w *Webdock) RestoreServerSnapshot(options RestoreServerSnapshotOptions) (string, error) {
 
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`/v1/servers/%s/actions/restore`, serverSlug),
+		Path:   fmt.Sprintf(`/v1/servers/%s/actions/restore`, options.ServerSlug),
 	}
 
 	jsonBody := map[string]string{
-		"snapshotId": snapshotId,
+		"snapshotId": options.SnapshotId,
 	}
 	data, err := json.Marshal(jsonBody)
 	if err != nil {

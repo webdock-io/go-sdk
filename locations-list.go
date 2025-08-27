@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -17,7 +17,9 @@ type Location struct {
 	Icon        string `json:"icon"`
 }
 
-func (w *Webdock) ListLocations() ([]Location, error) {
+type ListLocationsOptions struct{}
+
+func (w *Webdock) ListLocations(options ListLocationsOptions) ([]Location, error) {
 	apiURL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

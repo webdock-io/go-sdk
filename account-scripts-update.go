@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -10,14 +10,14 @@ import (
 	"strconv"
 )
 
-type AccountScriptUpdateOptions struct {
+type UpdateAccountScriptOptions struct {
 	ScriptId int64  `json:"-"`
 	Name     string `json:"name"`
 	Filename string `json:"filename"`
 	Content  string `json:"content"`
 }
 
-func (w *Webdock) UpdateAccountScript(opts AccountScriptUpdateOptions) (AccountScriptDTO, error) {
+func (w *Webdock) UpdateAccountScript(opts UpdateAccountScriptOptions) (AccountScriptDTO, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,

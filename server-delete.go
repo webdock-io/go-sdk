@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"encoding/json"
@@ -8,11 +8,15 @@ import (
 	"net/url"
 )
 
-func (w *Webdock) DeleteServerBuySlug(slug string) error {
+type DeleteServerBySlugOptions struct {
+	Slug string `json:"slug"`
+}
+
+func (w *Webdock) DeleteServerBySlug(options DeleteServerBySlugOptions) error {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/servers/%s", slug),
+		Path:   fmt.Sprintf("/servers/%s", options.Slug),
 	}
 
 	req, err := http.NewRequest("DELETE", URL.String(), nil)

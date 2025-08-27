@@ -1,4 +1,4 @@
-package gosdk
+package sdk
 
 import (
 	"bytes"
@@ -17,15 +17,20 @@ type FetchServersFileResponse struct {
 	CallbackID string `json:"-"` // From X-Callback-ID header
 }
 
-func (w *Webdock) FetchServersFile(serverSlug string, filePath string) (FetchServersFileResponse, error) {
+type FetchServersFileOptions struct {
+	ServerSlug string
+	FilePath   string
+}
+
+func (w *Webdock) FetchServersFile(options FetchServersFileOptions) (FetchServersFileResponse, error) {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/fetchFile", serverSlug),
+		Path:   fmt.Sprintf("/v1/servers/%s/fetchFile", options.ServerSlug),
 	}
 
 	requestBody := FetchServersFileRequest{
-		FilePath: filePath,
+		FilePath: options.FilePath,
 	}
 
 	data, err := json.Marshal(requestBody)
