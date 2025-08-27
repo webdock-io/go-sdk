@@ -2,7 +2,7 @@
 
 A Go SDK library and wrapper for the [Webdock API](https://webdock.io/).
 
-You can find the full documentation at https://pkg.go.dev/github.com/webdock-io/go-sdk
+You can find the full documentation at https://pkg.go.dev/github.com/webdock-io/go-sdk#Webdock
 
 ## Installation
 
