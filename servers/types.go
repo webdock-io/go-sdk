@@ -1,4 +1,13 @@
-package sdk
+package servers
+
+import (
+	"github.com/webdock-io/go-sdk/client"
+	serverscripts "github.com/webdock-io/go-sdk/servers/scripts"
+	"github.com/webdock-io/go-sdk/servers/shellusers"
+	"github.com/webdock-io/go-sdk/servers/snapshots"
+)
+
+type ServerState string
 
 const (
 	Provisioning ServerState = "provisioning"
@@ -12,7 +21,6 @@ const (
 	Suspended    ServerState = "suspended"
 )
 
-type ServerState string
 type Virtualization string
 
 const (
@@ -34,9 +42,9 @@ type Server struct {
 	Date                   string         `json:"date"`
 	Location               string         `json:"location"`
 	Image                  string         `json:"image"`
-	Profile                string         `json:"profile"` // nullable
-	IPv4                   string         `json:"ipv4"`    // nullable
-	IPv6                   string         `json:"ipv6"`    // nullable
+	Profile                string         `json:"profile"`
+	IPv4                   string         `json:"ipv4"`
+	IPv6                   string         `json:"ipv6"`
 	Status                 ServerState    `json:"status"`
 	Virtualization         Virtualization `json:"virtualization"`
 	WebServer              ServerType     `json:"webServer"`
@@ -48,4 +56,19 @@ type Server struct {
 	Notes                  string         `json:"notes"`
 	NextActionDate         string         `json:"nextActionDate"`
 }
-type ListServers []Server
+
+type Servers struct {
+	client     *client.Client
+	Scripts    serverscripts.ServerScripts
+	ShellUsers shellusers.ShellUsers
+	Snapshots  snapshots.Snapshots
+}
+
+func New(c *client.Client) Servers {
+	return Servers{
+		client:     c,
+		Scripts:    serverscripts.New(c),
+		ShellUsers: shellusers.New(c),
+		Snapshots:  snapshots.New(c),
+	}
+}

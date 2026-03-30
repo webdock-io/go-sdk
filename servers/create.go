@@ -1,13 +1,19 @@
-package sdk
+package servers
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
+
+	"github.com/webdock-io/go-sdk/client"
 )
+
+type CreateServerFromImageOptions struct {
+	Name        string `json:"name"`
+	LocationId  string `json:"locationId"`
+	ProfileSlug string `json:"profileSlug"`
+	ImageSlug   string `json:"imageSlug"`
+}
 
 type CreateServerFromSnapshotOptions struct {
 	Name        string `json:"name"`
@@ -16,110 +22,35 @@ type CreateServerFromSnapshotOptions struct {
 	SnapshotId  int    `json:"snapshotId"`
 }
 
-// You can blame Arni for not being able to pass the slug
-// arni@webdock.io
-type CreateServerFromImageOptions struct {
-	Name        string `json:"name"`
-	LocationId  string `json:"locationId"`
-	ProfileSlug string `json:"profileSlug"`
-	ImageSlug   string `json:"imageSlug"`
-}
 type CreatedServer struct {
 	Server     Server `json:"server"`
-	CallbackID string `json:"X-Callback-ID"`
+	CallbackID string
 }
 
-func (w *Webdock) CreateServerFromSnapshot(ops CreateServerFromSnapshotOptions) (CreatedServer, error) {
-
-	apiURL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   "v1/servers",
-	}
-
-	data, err := json.Marshal(ops)
-
+func (s *Servers) CreateFromImage(opts CreateServerFromImageOptions) (*CreatedServer, error) {
+	data, err := json.Marshal(opts)
 	if err != nil {
-		return CreatedServer{}, fmt.Errorf("failed to marshal request Body %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
-	req, err := http.NewRequest("POST", apiURL.String(), bytes.NewBuffer(data))
+	var out Server
+	c, err := s.client.Do("POST", "v1/servers", bytes.NewBuffer(data), &out)
 	if err != nil {
-		return CreatedServer{}, err
+		return nil, err
 	}
-	req.Header.Set("content-type", "application/json")
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return CreatedServer{}, err
-	}
-
-	defer res.Body.Close()
-
-	server := Server{}
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return CreatedServer{}, fmt.Errorf("failed to read response: %w", err)
-	}
-	if err := json.Unmarshal(body, &server); err != nil {
-		return CreatedServer{}, err
-	}
-
-	return CreatedServer{
-		Server:     server,
-		CallbackID: res.Header.Get("X-Callback-ID"),
-	}, nil
+	callbackID, _ := c.GetHeader(client.CallbackID)
+	return &CreatedServer{Server: out, CallbackID: callbackID}, nil
 }
 
-func (w *Webdock) CreateServerFromImage(ops CreateServerFromImageOptions) (CreatedServer, error) {
-
-	apiURL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   "v1/servers",
-	}
-	jsonData, err := json.Marshal(ops)
-	fmt.Println(string(jsonData))
+func (s *Servers) CreateFromSnapshot(opts CreateServerFromSnapshotOptions) (*CreatedServer, error) {
+	data, err := json.Marshal(opts)
 	if err != nil {
-		return CreatedServer{}, fmt.Errorf("failed to marshal request data: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
-	req, err := http.NewRequest("POST", apiURL.String(), bytes.NewBuffer(jsonData))
-	req.Header.Set("content-type", "application/json")
+	var out Server
+	c, err := s.client.Do("POST", "v1/servers", bytes.NewBuffer(data), &out)
 	if err != nil {
-		return CreatedServer{}, err
+		return nil, err
 	}
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	res, err := w.client.Do(req)
-	if err != nil {
-		return CreatedServer{}, err
-	}
-
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return CreatedServer{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusAccepted {
-
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
-		if err != nil {
-			return CreatedServer{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
-		}
-		return CreatedServer{}, fmt.Errorf("operation failed: %s", webdock.Message)
-	}
-	server := Server{}
-
-	if err := json.Unmarshal(body, &server); err != nil {
-		return CreatedServer{}, err
-	}
-
-	return CreatedServer{
-		Server:     server,
-		CallbackID: res.Header.Get("X-Callback-ID"),
-	}, nil
+	callbackID, _ := c.GetHeader(client.CallbackID)
+	return &CreatedServer{Server: out, CallbackID: callbackID}, nil
 }

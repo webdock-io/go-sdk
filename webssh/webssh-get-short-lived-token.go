@@ -1,83 +1,33 @@
-package sdk
+package webssh
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 )
 
-type WebsshTokenRequest struct {
-	Username string `json:"username"`
-}
-
-type WebsshTokenResponse struct {
-	Token string `json:"token"`
-}
-
-type CreateShortLivedWebsshTokenOptions struct {
+type CreateShortLivedTokenOptions struct {
 	ServerSlug string
 	Username   string
 }
 
-func (w *Webdock) CreateShortLivedWebsshToken(options CreateShortLivedWebsshTokenOptions) (WebsshTokenResponse, error) {
-	API_URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("v1/servers/%s/shellUsers/WebsshToken", options.ServerSlug),
-	}
-
-	requestBody := WebsshTokenRequest{
-		Username: options.Username,
-	}
-
-	jsonBody, err := json.Marshal(requestBody)
-	if err != nil {
-		return WebsshTokenResponse{}, fmt.Errorf("failed to marshal request body: %w", err)
-	}
-
-	req, err := http.NewRequest("POST", API_URL.String(), bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return WebsshTokenResponse{}, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Authorization", w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return WebsshTokenResponse{}, fmt.Errorf("failed to call API: %w", err)
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return WebsshTokenResponse{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		webdockErr := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-
-		if err := json.Unmarshal(body, &webdockErr); err != nil {
-			return WebsshTokenResponse{}, fmt.Errorf("operation failed with status %d", res.StatusCode)
-		}
-
-		return WebsshTokenResponse{}, fmt.Errorf("operation failed: %s", webdockErr.Message)
-	}
-
-	var tokenResponse WebsshTokenResponse
-	if err := json.Unmarshal(body, &tokenResponse); err != nil {
-		return WebsshTokenResponse{}, fmt.Errorf("failed to parse response: %w", err)
-	}
-
-	return tokenResponse, nil
+type ShortLivedTokenResponse struct {
+	Token string `json:"token"`
 }
 
-func (w *Webdock) FormatWebsshURL(serverSlug, username, token string) string {
+func (s *Webssh) CreateShortLivedToken(opts CreateShortLivedTokenOptions) (*ShortLivedTokenResponse, error) {
+	body, err := json.Marshal(map[string]string{"username": opts.Username})
+	if err != nil {
+		return nil, fmt.Errorf("marshaling request: %w", err)
+	}
+	var out ShortLivedTokenResponse
+	_, err = s.client.Do("POST", fmt.Sprintf("v1/servers/%s/shellUsers/WebsshToken", opts.ServerSlug), bytes.NewBuffer(body), &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func FormatWebsshURL(serverSlug, username, token string) string {
 	return fmt.Sprintf("https://webdock.io/en/webssh/%s/%s?token=%s", serverSlug, username, token)
 }

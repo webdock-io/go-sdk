@@ -1,79 +1,62 @@
-package sdk
+package servers
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
+	"time"
+
+	"github.com/webdock-io/go-sdk/client"
+	"github.com/webdock-io/go-sdk/evens"
 )
 
-type FetchServersFileRequest struct {
-	FilePath string `json:"filePath"`
-}
-
-type FetchServersFileResponse struct {
-	CallbackID string `json:"-"` // From X-Callback-ID header
-}
-
-type FetchServersFileOptions struct {
+type FetchFileOptions struct {
 	ServerSlug string
 	FilePath   string
 }
 
-func (w *Webdock) FetchServersFile(options FetchServersFileOptions) (FetchServersFileResponse, error) {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/fetchFile", options.ServerSlug),
-	}
+type FetchFileResponse struct {
+	CallbackID string
+}
 
-	requestBody := FetchServersFileRequest{
-		FilePath: options.FilePath,
-	}
-
-	data, err := json.Marshal(requestBody)
+func (s *Servers) FetchFileAsync(opts FetchFileOptions) (*FetchFileResponse, error) {
+	data, err := json.Marshal(map[string]string{"filePath": opts.FilePath})
 	if err != nil {
-		return FetchServersFileResponse{}, fmt.Errorf("error marshaling request body: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
-
-	req, err := http.NewRequest("POST", URL.String(), bytes.NewBuffer(data))
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
+	c, err := s.client.Do("POST", fmt.Sprintf("v1/servers/%s/fetchFile", opts.ServerSlug), bytes.NewBuffer(data), nil)
 	if err != nil {
-		return FetchServersFileResponse{}, fmt.Errorf("error creating request: %w", err)
+		return nil, err
+	}
+	callbackID, _ := c.GetHeader(client.CallbackID)
+	return &FetchFileResponse{CallbackID: callbackID}, nil
+}
+
+func (s *Servers) FetchFileSync(opts FetchFileOptions) (string, error) {
+	resp, err := s.FetchFileAsync(opts)
+	if err != nil {
+		return "", fmt.Errorf("failed to initiate file fetch for %q on server %q: %w", opts.FilePath, opts.ServerSlug, err)
 	}
 
-	res, err := w.client.Do(req)
-	if err != nil {
-		return FetchServersFileResponse{}, fmt.Errorf("operation failed: %w", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return FetchServersFileResponse{}, fmt.Errorf("failed to read response: %w", err)
-	}
+	events := evens.New(s.client)
+	callbackID := resp.CallbackID
 
-	if res.StatusCode != http.StatusAccepted {
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
+	for {
+		result, err := events.List(evens.ListEventsOptions{CallbackId: &callbackID})
 		if err != nil {
-			return FetchServersFileResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
+			return "", fmt.Errorf("failed to retrieve operation status (callback ID: %s): %w", callbackID, err)
 		}
-		return FetchServersFileResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
+
+		if len(result.Events) > 0 {
+			ev := result.Events[0]
+			switch ev.Status {
+			case "finished":
+				return ev.Message, nil
+			case "error":
+				return "", fmt.Errorf("file fetch failed for %q: %s", opts.FilePath, ev.Message)
+			}
+		}
+
+		time.Sleep(3 * time.Second)
 	}
-
-	var response FetchServersFileResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return FetchServersFileResponse{}, fmt.Errorf("error decoding response: %w", err)
-	}
-
-	response.CallbackID = res.Header.Get("X-Callback-ID")
-
-	return response, nil
 }

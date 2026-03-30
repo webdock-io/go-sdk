@@ -1,60 +1,18 @@
-package sdk
+package webdock
 
-import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-)
-
-type GetPublicScriptsResponse []AccountScriptDTO
-
-type ListWebdockScriptsOptions struct {
+type Script struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Filename    string `json:"filename"`
+	Content     string `json:"content"`
 }
 
-// List webdock pre-made scripts
-func (w *Webdock) ListWebdockScript(options ListWebdockScriptsOptions) (GetPublicScriptsResponse, error) {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   "/v1/scripts",
-	}
-
-	req, err := http.NewRequest("GET", URL.String(), nil)
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
+func (s *Scripts) List() ([]Script, error) {
+	var out []Script
+	_, err := s.client.Do("GET", "v1/scripts", nil, &out)
 	if err != nil {
-		return GetPublicScriptsResponse{}, fmt.Errorf("error creating request: %w", err)
+		return nil, err
 	}
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return GetPublicScriptsResponse{}, fmt.Errorf("operation failed: %w", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return GetPublicScriptsResponse{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
-		if err != nil {
-			return GetPublicScriptsResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
-		}
-		return GetPublicScriptsResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
-	}
-
-	var response GetPublicScriptsResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return GetPublicScriptsResponse{}, fmt.Errorf("error decoding response: %w", err)
-	}
-
-	return response, nil
+	return out, nil
 }

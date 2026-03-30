@@ -1,69 +1,16 @@
-package sdk
+package serverscripts
 
-import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-)
+import "fmt"
 
-type ServerScriptDTO struct {
-	ID                int64  `json:"id"`
-	Name              string `json:"name"`
-	Path              string `json:"path"`
-	LastRun           string `json:"lastRun"`
-	LastRunCallbackId string `json:"lastRunCallbackId"`
-	Created           string `json:"created"`
-}
-
-type GetServerScriptsResponse []ServerScriptDTO
-
-type GetServerScriptsOptions struct {
+type ListScriptsOptions struct {
 	ServerSlug string
 }
 
-func (w *Webdock) ListServersScripts(options GetServerScriptsOptions) (GetServerScriptsResponse, error) {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/scripts", options.ServerSlug),
-	}
-
-	req, err := http.NewRequest("GET", URL.String(), nil)
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
+func (s *ServerScripts) List(opts ListScriptsOptions) ([]ServerScriptDTO, error) {
+	var out []ServerScriptDTO
+	_, err := s.client.Do("GET", fmt.Sprintf("v1/servers/%s/scripts", opts.ServerSlug), nil, &out)
 	if err != nil {
-		return GetServerScriptsResponse{}, fmt.Errorf("error creating request: %w", err)
+		return nil, err
 	}
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return GetServerScriptsResponse{}, fmt.Errorf("operation failed: %w", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return GetServerScriptsResponse{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
-		if err != nil {
-			return GetServerScriptsResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
-		}
-		return GetServerScriptsResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
-	}
-
-	var response GetServerScriptsResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return GetServerScriptsResponse{}, fmt.Errorf("error decoding response: %w", err)
-	}
-
-	return response, nil
+	return out, nil
 }

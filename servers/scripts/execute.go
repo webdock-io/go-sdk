@@ -1,66 +1,21 @@
-package sdk
+package serverscripts
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"strconv"
+
+	"github.com/webdock-io/go-sdk/client"
 )
 
-type ExecuteServerScriptResponse struct {
-	CallbackID string `json:"X-Callback-ID"` // From X-Callback-ID header
-}
-
-type ExecuteServerScriptOptions struct {
+type ExecuteScriptOptions struct {
 	ServerSlug string
 	ScriptId   int
 }
 
-func (w *Webdock) ExecuteServerScript(options ExecuteServerScriptOptions) (ExecuteServerScriptResponse, error) {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/scripts/%s/execute", options.ServerSlug, strconv.Itoa(options.ScriptId)),
-	}
-
-	req, err := http.NewRequest("POST", URL.String(), nil)
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
+func (s *ServerScripts) Execute(opts ExecuteScriptOptions) (string, error) {
+	c, err := s.client.Do("POST", fmt.Sprintf("v1/servers/%s/scripts/%d/execute", opts.ServerSlug, opts.ScriptId), nil, nil)
 	if err != nil {
-		return ExecuteServerScriptResponse{}, fmt.Errorf("error creating request: %w", err)
+		return "", err
 	}
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return ExecuteServerScriptResponse{}, fmt.Errorf("operation failed: %w", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return ExecuteServerScriptResponse{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusAccepted {
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
-		if err != nil {
-			return ExecuteServerScriptResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
-		}
-		return ExecuteServerScriptResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
-	}
-
-	var response ExecuteServerScriptResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return ExecuteServerScriptResponse{}, fmt.Errorf("error decoding response: %w", err)
-	}
-
-	response.CallbackID = res.Header.Get("X-Callback-ID")
-
-	return response, nil
+	callbackID, _ := c.GetHeader(client.CallbackID)
+	return callbackID, nil
 }

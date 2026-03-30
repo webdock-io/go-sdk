@@ -1,7 +1,5 @@
 package account
 
-import "github.com/webdock-io/go-sdk/client"
-
 type AccountInformation struct {
 	UserID                 int    `json:"userId"`
 	CompanyName            string `json:"companyName"`
@@ -15,9 +13,9 @@ type AccountInformation struct {
 	AccountBalanceCurrency string `json:"accountBalanceCurrency"`
 }
 
-func (Account) Info() (*AccountInformation, error) {
+func (a *Account) Info() (*AccountInformation, error) {
 	var out AccountInformation
-	_, err := client.Do("GET", "account/accountInformation", nil, &out)
+	_, err := a.client.Do("GET", "v1/account/accountInformation", nil, &out)
 	if err != nil {
 		return nil, err
 	}

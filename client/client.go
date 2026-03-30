@@ -6,59 +6,68 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type WebdockHeaderEnum string
 
 const (
-	CallbackID WebdockHeaderEnum = "X-Callback-ID"
+	CallbackID  WebdockHeaderEnum = "X-Callback-ID"
+	XTotalCount WebdockHeaderEnum = "X-Total-Count"
 )
 
 type Client struct {
-	res *http.Response
+	token      string
+	baseURL    string
+	httpClient *http.Client
+	res        *http.Response
 }
 
-func New() Client {
-	return Client{}
+func New(token string) *Client {
+	return &Client{
+		token:      token,
+		baseURL:    "api.webdock.io",
+		httpClient: &http.Client{Timeout: 30 * time.Second},
+	}
 }
 
 func (c *Client) GetHeader(name WebdockHeaderEnum) (string, error) {
-	if c.res != nil {
-		return "", fmt.Errorf("req failed")
+	if c.res == nil {
+		return "", fmt.Errorf("no response available")
 	}
 	return c.res.Header.Get(string(name)), nil
 }
 
-func Do(method string, path string, payload io.Reader, out any) (*Client, error) {
-	client := http.Client{
-		Timeout: 5,
-	}
-	URL := url.URL{
-		Scheme: "https",
-		Host:   "api.webdock.io",
-		Path:   path,
+func (c *Client) Do(method string, path string, payload io.Reader, out any) (*Client, error) {
+	parsed, err := url.Parse(path)
+	if err != nil {
+		return nil, fmt.Errorf("invalid path: %w", err)
 	}
 
-	req, err := http.NewRequest(method, URL.String(), payload)
-	if err != nil {
+	apiURL := url.URL{
+		Scheme:   "https",
+		Host:     c.baseURL,
+		Path:     parsed.Path,
+		RawQuery: parsed.RawQuery,
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", ""))
+
+	req, err := http.NewRequest(method, apiURL.String(), payload)
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
 	req.Header.Set("Content-Type", "application/json")
 
-	res, err := client.Do(req)
-
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-
 	if out != nil {
 		if err := json.NewDecoder(res.Body).Decode(out); err != nil {
 			return nil, fmt.Errorf("decoding response: %w", err)
 		}
 	}
 
-	return &Client{
-		res: res,
-	}, nil
+	return &Client{res: res}, nil
 }

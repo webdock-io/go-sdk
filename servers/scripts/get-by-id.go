@@ -1,61 +1,17 @@
-package sdk
+package serverscripts
 
-import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"strconv"
-)
+import "fmt"
 
-type GetServerScriptGetByIdOptions struct {
-	ServerSlug string `json:"serverSlug"`
-	ScriptId   int    `json:"scriptId"`
+type GetScriptByIDOptions struct {
+	ServerSlug string
+	ScriptId   int
 }
 
-func (w *Webdock) GetServerScriptGetById(opts GetServerScriptGetByIdOptions) (AccountScriptDTO, error) {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf("/v1/servers/%s/scripts/%s", opts.ServerSlug, strconv.Itoa(opts.ScriptId)),
-	}
-
-	req, err := http.NewRequest("GET", URL.String(), nil)
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
+func (s *ServerScripts) GetByID(opts GetScriptByIDOptions) (*Script, error) {
+	var out Script
+	_, err := s.client.Do("GET", fmt.Sprintf("v1/servers/%s/scripts/%d", opts.ServerSlug, opts.ScriptId), nil, &out)
 	if err != nil {
-		return AccountScriptDTO{}, fmt.Errorf("error creating request: %w", err)
+		return nil, err
 	}
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return AccountScriptDTO{}, fmt.Errorf("operation failed: %w", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return AccountScriptDTO{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
-		if err != nil {
-			return AccountScriptDTO{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
-		}
-		return AccountScriptDTO{}, fmt.Errorf("operation failed: %s", webdock.Message)
-	}
-	fmt.Println("body", string(body))
-
-	var response AccountScriptDTO
-	if err := json.Unmarshal(body, &response); err != nil {
-		return AccountScriptDTO{}, fmt.Errorf("error decoding response: %w", err)
-	}
-
-	return response, nil
+	return &out, nil
 }

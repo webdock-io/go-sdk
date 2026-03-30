@@ -1,12 +1,9 @@
-package sdk
+package servers
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 )
 
 type WarningDTO struct {
@@ -37,66 +34,20 @@ type ResizeDryRunResponse struct {
 	ChargeSummary ChargeSummaryDTO `json:"chargeSummary"`
 }
 
-type ResizeDryRunRequest struct {
-	ProfileSlug string `json:"profileSlug"`
-}
-
 type DryRunResizeServerOptions struct {
 	ServerSlug  string
 	ProfileSlug string
 }
 
-func (w *Webdock) DryRunResizeServer(options DryRunResizeServerOptions) (ResizeDryRunResponse, error) {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   w.BASE_URL,
-		Path:   fmt.Sprintf(`/v1/servers/%s/actions/resize/dryrun`, options.ServerSlug),
-	}
-
-	requestBody := ResizeDryRunRequest{
-		ProfileSlug: options.ProfileSlug,
-	}
-
-	data, err := json.Marshal(requestBody)
+func (s *Servers) ResizeDryRun(opts DryRunResizeServerOptions) (*ResizeDryRunResponse, error) {
+	data, err := json.Marshal(map[string]string{"profileSlug": opts.ProfileSlug})
 	if err != nil {
-		return ResizeDryRunResponse{}, fmt.Errorf("error marshaling request body: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
-
-	req, err := http.NewRequest("POST", URL.String(), bytes.NewBuffer(data))
-	req.Header.Set(w.Authorization, w.GetFormatedToken())
-	req.Header.Set("Content-Type", "application/json")
-
+	var out ResizeDryRunResponse
+	_, err = s.client.Do("POST", fmt.Sprintf("v1/servers/%s/actions/resize/dryrun", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
-		return ResizeDryRunResponse{}, fmt.Errorf("error creating request: %w", err)
+		return nil, err
 	}
-
-	res, err := w.client.Do(req)
-	if err != nil {
-		return ResizeDryRunResponse{}, fmt.Errorf("operation failed: %w", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return ResizeDryRunResponse{}, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-
-		webdock := WebdockError{
-			ID:      1,
-			Message: "error occurred",
-		}
-		err = json.Unmarshal(body, &webdock)
-		if err != nil {
-			return ResizeDryRunResponse{}, fmt.Errorf("%s", http.StatusText(res.StatusCode))
-		}
-		return ResizeDryRunResponse{}, fmt.Errorf("operation failed: %s", webdock.Message)
-	}
-
-	var response ResizeDryRunResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return ResizeDryRunResponse{}, fmt.Errorf("error decoding response: %w", err)
-	}
-
-	return response, nil
+	return &out, nil
 }
