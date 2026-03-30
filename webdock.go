@@ -1,42 +1,43 @@
 package sdk
 
 import (
-	"errors"
-	"fmt"
-	"log"
-	"net/http"
-	"net/url"
+	"github.com/webdock-io/go-sdk/account"
+	"github.com/webdock-io/go-sdk/client"
+	"github.com/webdock-io/go-sdk/evens"
+	"github.com/webdock-io/go-sdk/hooks"
+	"github.com/webdock-io/go-sdk/images"
+	"github.com/webdock-io/go-sdk/loactions"
+	"github.com/webdock-io/go-sdk/profiles"
+	"github.com/webdock-io/go-sdk/servers"
+	"github.com/webdock-io/go-sdk/webdock"
+	"github.com/webdock-io/go-sdk/webssh"
 )
 
 type Webdock struct {
-	Token         string
-	Authorization string
-	BASE_URL      string
-	client        *http.Client
+	client    *client.Client
+	Account   account.Account
+	Events    evens.Events
+	Hooks     hooks.Hooks
+	Images    images.Images
+	Locations loactions.Locations
+	Profiles  profiles.Profiles
+	Servers   servers.Servers
+	Webdock   webdock.Webdock
+	Webssh    webssh.Webssh
 }
 
-func (w *Webdock) GetFormatedToken() string {
-	return fmt.Sprintf("Bearer %s", w.Token)
-
-}
-
-func (w *Webdock) GetFormatedURL(p string) string {
-	apiURL, err := url.JoinPath(w.BASE_URL, p)
-	if err != nil {
-		log.Fatal(errors.New("failed to build API URL"))
-	}
-	return apiURL
-}
-
-type WebdockOptions struct {
-	TOKEN string
-}
-
-func New(opts WebdockOptions) Webdock {
+func New(token string) Webdock {
+	c := client.New(token)
 	return Webdock{
-		Token:         opts.TOKEN,
-		Authorization: "Authorization",
-		BASE_URL:      "api.webdock.io",
-		client:        &http.Client{},
+		client:    c,
+		Account:   account.New(c),
+		Events:    evens.New(c),
+		Hooks:     hooks.New(c),
+		Images:    images.New(c),
+		Locations: loactions.New(c),
+		Profiles:  profiles.New(c),
+		Servers:   servers.New(c),
+		Webdock:   webdock.New(c),
+		Webssh:    webssh.New(c),
 	}
 }
