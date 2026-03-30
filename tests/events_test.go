@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/webdock-io/go-sdk/evens"
+	"github.com/webdock-io/go-sdk/events"
 )
 
 func TestEventsAPI(t *testing.T) {
@@ -15,7 +15,7 @@ func TestEventsAPI(t *testing.T) {
 	client := getClient()
 
 	t.Run("ListAndValidateStructure", func(t *testing.T) {
-		res, err := client.Events.List(evens.ListEventsOptions{})
+		res, err := client.Events.List(events.ListEventsOptions{})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

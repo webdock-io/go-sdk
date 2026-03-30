@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/webdock-io/go-sdk/client"
-	"github.com/webdock-io/go-sdk/evens"
+	"github.com/webdock-io/go-sdk/events"
 )
 
 type FetchFileOptions struct {
@@ -38,11 +38,14 @@ func (s *Servers) FetchFileSync(opts FetchFileOptions) (string, error) {
 		return "", fmt.Errorf("failed to initiate file fetch for %q on server %q: %w", opts.FilePath, opts.ServerSlug, err)
 	}
 
-	events := evens.New(s.client)
+	eventsClient := events.New(s.client)
 	callbackID := resp.CallbackID
 
 	for {
-		result, err := events.List(evens.ListEventsOptions{CallbackId: &callbackID})
+
+		result, err := eventsClient.List(events.ListEventsOptions{
+			CallbackId: &callbackID,
+		})
 		if err != nil {
 			return "", fmt.Errorf("failed to retrieve operation status (callback ID: %s): %w", callbackID, err)
 		}

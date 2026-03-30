@@ -7,7 +7,7 @@ import (
 	"time"
 
 	sdk "github.com/webdock-io/go-sdk"
-	"github.com/webdock-io/go-sdk/evens"
+	"github.com/webdock-io/go-sdk/events"
 )
 
 func getClient() sdk.Webdock {
@@ -25,7 +25,7 @@ func waitForCallback(t *testing.T, client sdk.Webdock, callbackID string) {
 		return
 	}
 	for {
-		res, err := client.Events.List(evens.ListEventsOptions{CallbackId: &callbackID})
+		res, err := client.Events.List(events.ListEventsOptions{CallbackId: &callbackID})
 		if err != nil {
 			t.Fatalf("error fetching event log: %v", err)
 		}
