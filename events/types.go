@@ -1,4 +1,4 @@
-package evens
+package events
 
 import "github.com/webdock-io/go-sdk/client"
 

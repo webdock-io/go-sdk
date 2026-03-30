@@ -1,4 +1,4 @@
-package evens
+package events
 
 import (
 	"net/url"
