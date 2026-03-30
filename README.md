@@ -23,21 +23,14 @@ import (
 )
 
 func main() {
-	client := webdock.New(webdock.WebdockOptions{
-		TOKEN: "your-api-token-here",
-	})
+	client := webdock.New("your-api-token-here")
 
-	// Example usage
-	servers, err := client.ListServers(webdock.ListServerOptions{
-		Status: webdock.ActiveServers,
-	})
-
+	pong, err := client.Webdock.Ping()
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-
-	fmt.Printf("Found %d servers\n", len(servers))
+ 	fmt.Println(pong)
 }
 ```
 
