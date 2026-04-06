@@ -17,8 +17,8 @@ type CreateScriptOptions struct {
 }
 
 type CreateScriptResponse struct {
-	Script     Script `tfsdk:"script"`
-	CallbackID string `tfsdk:"callback_id"`
+	Script     Script `json:"script" tfsdk:"script"`
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
 func (s *ServerScripts) Create(opts CreateScriptOptions) (*CreateScriptResponse, error) {

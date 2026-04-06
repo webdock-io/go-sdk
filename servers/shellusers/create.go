@@ -18,8 +18,8 @@ type CreateShellUserOptions struct {
 }
 
 type CreatedShellUser struct {
-	ShellUser  ShellUser `tfsdk:"shell_user"`
-	CallbackID string    `tfsdk:"callback_id"`
+	ShellUser  ShellUser `json:"shell_user" tfsdk:"shell_user"`
+	CallbackID string    `json:"callbackId" tfsdk:"callback_id"`
 }
 
 func (s *ShellUsers) Create(opts CreateShellUserOptions) (*CreatedShellUser, error) {

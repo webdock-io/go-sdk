@@ -21,8 +21,8 @@ type EventDTO struct {
 }
 
 type ListEventsResponse struct {
-	Events     []EventDTO `tfsdk:"events"`
-	TotalCount int32      `tfsdk:"total_count"`
+	Events     []EventDTO `json:"events" tfsdk:"events"`
+	TotalCount int32      `json:"total_count" tfsdk:"total_count"`
 }
 
 type ListEventsOptions struct {
