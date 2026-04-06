@@ -1,16 +1,16 @@
 package account
 
 type AccountInformation struct {
-	UserID                 int    `json:"userId"`
-	CompanyName            string `json:"companyName"`
-	UserName               string `json:"userName"`
-	UserAvatar             string `json:"userAvatar"`
-	UserEmail              string `json:"userEmail"`
-	IsTeamMember           bool   `json:"isTeamMember"`
-	TeamLeader             string `json:"teamLeader"`
-	AccountBalance         string `json:"accountBalance"`
-	AccountBalanceRaw      string `json:"accountBalanceRaw"`
-	AccountBalanceCurrency string `json:"accountBalanceCurrency"`
+	UserID                 int    `json:"userId" tfsdk:"user_id"`
+	CompanyName            string `json:"companyName" tfsdk:"company_name"`
+	UserName               string `json:"userName" tfsdk:"user_name"`
+	UserAvatar             string `json:"userAvatar" tfsdk:"user_avatar"`
+	UserEmail              string `json:"userEmail" tfsdk:"user_email"`
+	IsTeamMember           bool   `json:"isTeamMember" tfsdk:"is_team_member"`
+	TeamLeader             string `json:"teamLeader" tfsdk:"team_leader"`
+	AccountBalance         string `json:"accountBalance" tfsdk:"account_balance"`
+	AccountBalanceRaw      string `json:"accountBalanceRaw" tfsdk:"account_balance_raw"`
+	AccountBalanceCurrency string `json:"accountBalanceCurrency" tfsdk:"account_balance_currency"`
 }
 
 func (a *Account) Info() (*AccountInformation, error) {

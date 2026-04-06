@@ -3,20 +3,20 @@ package serverscripts
 import "github.com/webdock-io/go-sdk/client"
 
 type Script struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Filename    string `json:"filename"`
-	Content     string `json:"content"`
+	ID          int64  `json:"id" tfsdk:"id"`
+	Name        string `json:"name" tfsdk:"name"`
+	Description string `json:"description" tfsdk:"description"`
+	Filename    string `json:"filename" tfsdk:"filename"`
+	Content     string `json:"content" tfsdk:"content"`
 }
 
 type ServerScriptDTO struct {
-	ID                int64  `json:"id"`
-	Name              string `json:"name"`
-	Path              string `json:"path"`
-	LastRun           string `json:"lastRun"`
-	LastRunCallbackId string `json:"lastRunCallbackId"`
-	Created           string `json:"created"`
+	ID                int64  `json:"id" tfsdk:"id"`
+	Name              string `json:"name" tfsdk:"name"`
+	Path              string `json:"path" tfsdk:"path"`
+	LastRun           string `json:"lastRun" tfsdk:"last_run"`
+	LastRunCallbackId string `json:"lastRunCallbackId" tfsdk:"last_run_callback_id"`
+	Created           string `json:"created" tfsdk:"created"`
 }
 
 type ServerScripts struct {

@@ -1,10 +1,10 @@
 package accountpublickeys
 
 type PublicKey struct {
-	ID      int64  `json:"id"`
-	Name    string `json:"name"`
-	Key     string `json:"key"`
-	Created string `json:"created"`
+	ID      int64  `json:"id" tfsdk:"id"`
+	Name    string `json:"name" tfsdk:"name"`
+	Key     string `json:"key" tfsdk:"key"`
+	Created string `json:"created" tfsdk:"created"`
 }
 
 func (w *AccountPublicKeys) List() (*[]PublicKey, error) {

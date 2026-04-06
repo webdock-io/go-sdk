@@ -1,11 +1,11 @@
 package scripts
 
 type AccountScriptDTO struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Filename    string `json:"filename"`
-	Content     string `json:"content"`
+	ID          int64  `json:"id" tfsdk:"id"`
+	Name        string `json:"name" tfsdk:"name"`
+	Description string `json:"description" tfsdk:"description"`
+	Filename    string `json:"filename" tfsdk:"filename"`
+	Content     string `json:"content" tfsdk:"content"`
 }
 
 type AccountScriptsListResponse []AccountScriptDTO

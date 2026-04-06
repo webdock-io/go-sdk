@@ -3,12 +3,12 @@ package loactions
 import "github.com/webdock-io/go-sdk/client"
 
 type Location struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	City        string `json:"city"`
-	Country     string `json:"country"`
-	Description string `json:"description"`
-	Icon        string `json:"icon"`
+	ID          string `json:"id" tfsdk:"id"`
+	Name        string `json:"name" tfsdk:"name"`
+	City        string `json:"city" tfsdk:"city"`
+	Country     string `json:"country" tfsdk:"country"`
+	Description string `json:"description" tfsdk:"description"`
+	Icon        string `json:"icon" tfsdk:"icon"`
 }
 
 type Locations struct {

@@ -11,9 +11,9 @@ type GetProfileOptions struct {
 }
 
 type ProfileDTO struct {
-	Slug        string `json:"slug"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Slug        string `json:"slug" tfsdk:"slug"`
+	Name        string `json:"name" tfsdk:"name"`
+	Description string `json:"description" tfsdk:"description"`
 }
 
 func (s *Servers) GetProfile(opts GetProfileOptions) (*ProfileDTO, error) {

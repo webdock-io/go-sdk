@@ -8,21 +8,21 @@ import (
 )
 
 type EventDTO struct {
-	ID         int64   `json:"id"`
-	StartTime  string  `json:"startTime"`
-	EndTime    *string `json:"endTime"`
-	CallbackId string  `json:"callbackId"`
-	ServerSlug string  `json:"serverSlug"`
-	EventType  string  `json:"eventType"`
-	Action     string  `json:"action"`
-	ActionData string  `json:"actionData"`
-	Status     string  `json:"status"`
-	Message    string  `json:"message"`
+	ID         int64   `json:"id" tfsdk:"id"`
+	StartTime  string  `json:"startTime" tfsdk:"start_time"`
+	EndTime    *string `json:"endTime" tfsdk:"end_time"`
+	CallbackId string  `json:"callbackId" tfsdk:"callback_id"`
+	ServerSlug string  `json:"serverSlug" tfsdk:"server_slug"`
+	EventType  string  `json:"eventType" tfsdk:"event_type"`
+	Action     string  `json:"action" tfsdk:"action"`
+	ActionData string  `json:"actionData" tfsdk:"action_data"`
+	Status     string  `json:"status" tfsdk:"status"`
+	Message    string  `json:"message" tfsdk:"message"`
 }
 
 type ListEventsResponse struct {
-	Events     []EventDTO
-	TotalCount int32
+	Events     []EventDTO `tfsdk:"events"`
+	TotalCount int32      `tfsdk:"total_count"`
 }
 
 type ListEventsOptions struct {

@@ -12,7 +12,7 @@ type CreateShortLivedTokenOptions struct {
 }
 
 type ShortLivedTokenResponse struct {
-	Token string `json:"token"`
+	Token string `json:"token" tfsdk:"token"`
 }
 
 func (s *Webssh) CreateShortLivedToken(opts CreateShortLivedTokenOptions) (*ShortLivedTokenResponse, error) {

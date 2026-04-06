@@ -3,10 +3,10 @@ package images
 import "github.com/webdock-io/go-sdk/client"
 
 type Image struct {
-	Slug       string  `json:"slug"`
-	Name       string  `json:"name"`
-	WebServer  *string `json:"webServer"`
-	PHPVersion *string `json:"phpVersion"`
+	Slug       string  `json:"slug" tfsdk:"slug"`
+	Name       string  `json:"name" tfsdk:"name"`
+	WebServer  *string `json:"webServer" tfsdk:"web_server"`
+	PHPVersion *string `json:"phpVersion" tfsdk:"php_version"`
 }
 
 type Images struct {

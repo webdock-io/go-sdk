@@ -23,8 +23,8 @@ type CreateServerFromSnapshotOptions struct {
 }
 
 type CreatedServer struct {
-	Server     Server `json:"server"`
-	CallbackID string
+	Server     Server `json:"server" tfsdk:"server"`
+	CallbackID string `tfsdk:"callback_id"`
 }
 
 func (s *Servers) CreateFromImage(opts CreateServerFromImageOptions) (*CreatedServer, error) {

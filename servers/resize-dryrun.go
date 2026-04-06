@@ -7,31 +7,31 @@ import (
 )
 
 type WarningDTO struct {
-	Type    string      `json:"type"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Type    string      `json:"type" tfsdk:"type"`
+	Message string      `json:"message" tfsdk:"message"`
+	Data    interface{} `json:"data" tfsdk:"data"`
 }
 
 type ChargeSummaryItemDTO struct {
-	Description string  `json:"description,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
+	Description string  `json:"description,omitempty" tfsdk:"description"`
+	Amount      float64 `json:"amount,omitempty" tfsdk:"amount"`
+	Currency    string  `json:"currency,omitempty" tfsdk:"currency"`
 }
 
 type ChargeSummaryTotalDTO struct {
-	Amount   float64 `json:"amount,omitempty"`
-	Currency string  `json:"currency,omitempty"`
+	Amount   float64 `json:"amount,omitempty" tfsdk:"amount"`
+	Currency string  `json:"currency,omitempty" tfsdk:"currency"`
 }
 
 type ChargeSummaryDTO struct {
-	Items    []ChargeSummaryItemDTO `json:"items"`
-	IsRefund bool                   `json:"isRefund"`
-	Total    ChargeSummaryTotalDTO  `json:"total"`
+	Items    []ChargeSummaryItemDTO `json:"items" tfsdk:"items"`
+	IsRefund bool                   `json:"isRefund" tfsdk:"is_refund"`
+	Total    ChargeSummaryTotalDTO  `json:"total" tfsdk:"total"`
 }
 
 type ResizeDryRunResponse struct {
-	Warnings      []WarningDTO     `json:"warnings"`
-	ChargeSummary ChargeSummaryDTO `json:"chargeSummary"`
+	Warnings      []WarningDTO     `json:"warnings" tfsdk:"warnings"`
+	ChargeSummary ChargeSummaryDTO `json:"chargeSummary" tfsdk:"charge_summary"`
 }
 
 type DryRunResizeServerOptions struct {

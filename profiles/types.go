@@ -3,9 +3,9 @@ package profiles
 import "github.com/webdock-io/go-sdk/client"
 
 type Profile struct {
-	Slug        string `json:"slug"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Slug        string `json:"slug" tfsdk:"slug"`
+	Name        string `json:"name" tfsdk:"name"`
+	Description string `json:"description" tfsdk:"description"`
 }
 
 type Profiles struct {

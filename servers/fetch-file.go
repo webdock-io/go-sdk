@@ -16,7 +16,7 @@ type FetchFileOptions struct {
 }
 
 type FetchFileResponse struct {
-	CallbackID string
+	CallbackID string `tfsdk:"callback_id"`
 }
 
 func (s *Servers) FetchFileAsync(opts FetchFileOptions) (*FetchFileResponse, error) {

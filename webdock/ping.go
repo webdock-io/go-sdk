@@ -1,7 +1,7 @@
 package webdock
 
 type PingResponse struct {
-	Webdock string `json:"webdock"`
+	Webdock string `json:"webdock" tfsdk:"webdock"`
 }
 
 func (w *Webdock) Ping() (*PingResponse, error) {

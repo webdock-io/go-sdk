@@ -43,13 +43,13 @@ func (st *SnapshotTime) UnmarshalJSON(data []byte) error {
 }
 
 type Snapshot struct {
-	ID             int64          `json:"id"`
-	Name           string         `json:"name"`
-	Date           SnapshotTime   `json:"date"`
-	Type           SnapshotType   `json:"type"`
-	Virtualization Virtualization `json:"virtualization"`
-	Completed      bool           `json:"completed"`
-	Deletable      bool           `json:"deletable"`
+	ID             int64          `json:"id" tfsdk:"id"`
+	Name           string         `json:"name" tfsdk:"name"`
+	Date           SnapshotTime   `json:"date" tfsdk:"date"`
+	Type           SnapshotType   `json:"type" tfsdk:"type"`
+	Virtualization Virtualization `json:"virtualization" tfsdk:"virtualization"`
+	Completed      bool           `json:"completed" tfsdk:"completed"`
+	Deletable      bool           `json:"deletable" tfsdk:"deletable"`
 }
 
 type Snapshots struct {

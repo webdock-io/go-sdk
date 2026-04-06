@@ -37,24 +37,24 @@ const (
 )
 
 type Server struct {
-	Slug                   string         `json:"slug"`
-	Name                   string         `json:"name"`
-	Date                   string         `json:"date"`
-	Location               string         `json:"location"`
-	Image                  string         `json:"image"`
-	Profile                string         `json:"profile"`
-	IPv4                   string         `json:"ipv4"`
-	IPv6                   string         `json:"ipv6"`
-	Status                 ServerState    `json:"status"`
-	Virtualization         Virtualization `json:"virtualization"`
-	WebServer              ServerType     `json:"webServer"`
-	Aliases                []string       `json:"aliases"`
-	SnapshotRunTime        int            `json:"snapshotRunTime"`
-	Description            string         `json:"description"`
-	WordPressLockDown      bool           `json:"WordPressLockDown"`
-	SSHPasswordAuthEnabled bool           `json:"SSHPasswordAuthEnabled"`
-	Notes                  string         `json:"notes"`
-	NextActionDate         string         `json:"nextActionDate"`
+	Slug                   string         `json:"slug" tfsdk:"slug"`
+	Name                   string         `json:"name" tfsdk:"name"`
+	Date                   string         `json:"date" tfsdk:"date"`
+	Location               string         `json:"location" tfsdk:"location"`
+	Image                  string         `json:"image" tfsdk:"image"`
+	Profile                string         `json:"profile" tfsdk:"profile"`
+	IPv4                   string         `json:"ipv4" tfsdk:"ipv4"`
+	IPv6                   string         `json:"ipv6" tfsdk:"ipv6"`
+	Status                 ServerState    `json:"status" tfsdk:"status"`
+	Virtualization         Virtualization `json:"virtualization" tfsdk:"virtualization"`
+	WebServer              ServerType     `json:"webServer" tfsdk:"web_server"`
+	Aliases                []string       `json:"aliases" tfsdk:"aliases"`
+	SnapshotRunTime        int            `json:"snapshotRunTime" tfsdk:"snapshot_run_time"`
+	Description            string         `json:"description" tfsdk:"description"`
+	WordPressLockDown      bool           `json:"WordPressLockDown" tfsdk:"wordpress_lock_down"`
+	SSHPasswordAuthEnabled bool           `json:"SSHPasswordAuthEnabled" tfsdk:"ssh_password_auth_enabled"`
+	Notes                  string         `json:"notes" tfsdk:"notes"`
+	NextActionDate         string         `json:"nextActionDate" tfsdk:"next_action_date"`
 }
 
 type Servers struct {

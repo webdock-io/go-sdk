@@ -14,8 +14,8 @@ type TakeSnapshotOptions struct {
 }
 
 type TakeSnapshotResponse struct {
-	Snapshot   Snapshot
-	CallbackID string
+	Snapshot   Snapshot `tfsdk:"snapshot"`
+	CallbackID string   `tfsdk:"callback_id"`
 }
 
 func (s *Snapshots) Take(opts TakeSnapshotOptions) (*TakeSnapshotResponse, error) {
