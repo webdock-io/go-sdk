@@ -1,4 +1,4 @@
-package webdock
+package platform
 
 type Script struct {
 	ID          int64  `json:"id" tfsdk:"id"`

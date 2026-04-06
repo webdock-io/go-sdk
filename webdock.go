@@ -1,4 +1,4 @@
-package sdk
+package webdock
 
 import (
 	"github.com/webdock-io/go-sdk/account"
@@ -9,7 +9,7 @@ import (
 	"github.com/webdock-io/go-sdk/loactions"
 	"github.com/webdock-io/go-sdk/profiles"
 	"github.com/webdock-io/go-sdk/servers"
-	"github.com/webdock-io/go-sdk/webdock"
+	platform "github.com/webdock-io/go-sdk/webdock"
 	"github.com/webdock-io/go-sdk/webssh"
 )
 
@@ -22,7 +22,7 @@ type Webdock struct {
 	Locations loactions.Locations
 	Profiles  profiles.Profiles
 	Servers   servers.Servers
-	Webdock   webdock.Webdock
+	Platform  platform.WebdockPlatform
 	Webssh    webssh.Webssh
 }
 
@@ -37,7 +37,7 @@ func New(token string) Webdock {
 		Locations: loactions.New(c),
 		Profiles:  profiles.New(c),
 		Servers:   servers.New(c),
-		Webdock:   webdock.New(c),
+		Platform:  platform.New(c),
 		Webssh:    webssh.New(c),
 	}
 }

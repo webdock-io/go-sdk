@@ -1,8 +1,8 @@
-package webdock
+package platform
 
 import "github.com/webdock-io/go-sdk/client"
 
-type Webdock struct {
+type WebdockPlatform struct {
 	client  *client.Client
 	Scripts Scripts
 }
@@ -10,8 +10,8 @@ type Scripts struct {
 	client *client.Client
 }
 
-func New(c *client.Client) Webdock {
-	return Webdock{client: c, Scripts: Scripts{
+func New(c *client.Client) WebdockPlatform {
+	return WebdockPlatform{client: c, Scripts: Scripts{
 		client: c,
 	}}
 }

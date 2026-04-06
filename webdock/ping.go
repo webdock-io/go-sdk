@@ -1,10 +1,10 @@
-package webdock
+package platform
 
 type PingResponse struct {
 	Webdock string `json:"webdock" tfsdk:"webdock"`
 }
 
-func (w *Webdock) Ping() (*PingResponse, error) {
+func (w *WebdockPlatform) Ping() (*PingResponse, error) {
 	var out PingResponse
 	_, err := w.client.Do("GET", "ping", nil, &out)
 	if err != nil {
