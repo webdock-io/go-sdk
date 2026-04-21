@@ -1,8 +1,10 @@
 package loactions
 
-func (s *Locations) List() ([]Location, error) {
+import "context"
+
+func (s *Locations) List(ctx context.Context) ([]Location, error) {
 	var out []Location
-	_, err := s.client.Do("GET", "v1/locations", nil, &out)
+	_, err := s.client.Do(ctx, "GET", "v1/locations", nil, &out)
 	if err != nil {
 		return nil, err
 	}

@@ -11,15 +11,12 @@ import (
 )
 
 func TestSnapshotsAPI(t *testing.T) {
+	client := getClient()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	if token == "" {
 		t.Skip("WEBDOCK_TOKEN not set")
 	}
-	if !isE2EEnabled() {
-		t.Skip("E2E tests disabled; set WEBDOCK_E2E=true to enable")
-	}
 
-	client := getClient()
 	var testServerSlug string
 	var snapshotID int64
 
@@ -27,13 +24,13 @@ func TestSnapshotsAPI(t *testing.T) {
 		if testServerSlug == "" {
 			return
 		}
-		if err := client.Servers.Delete(servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
+		if err := client.Servers.Delete(t.Context(), servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
 			t.Logf("cleanup: delete server %q failed: %v", testServerSlug, err)
 		}
 	})
 
 	t.Run("Setup_CreateTemporaryServer", func(t *testing.T) {
-		created, err := client.Servers.CreateFromImage(servers.CreateServerFromImageOptions{
+		created, err := client.Servers.CreateFromImage(t.Context(), servers.CreateServerFromImageOptions{
 			Name:        fmt.Sprintf("temp-%d", time.Now().UnixMilli()),
 			LocationId:  "dk",
 			ProfileSlug: "vps-epyc-pro-2025",
@@ -43,14 +40,17 @@ func TestSnapshotsAPI(t *testing.T) {
 			t.Fatalf("create server failed: %v", err)
 		}
 		testServerSlug = created.Server.Slug
-		waitForCallback(t, client, created.CallbackID)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), created.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", created.CallbackID, err)
+		}
+
 	})
 
 	t.Run("List_RetrieveAllSnapshots", func(t *testing.T) {
 		if testServerSlug == "" {
 			t.Skip("no server created")
 		}
-		snaps, err := client.Servers.Snapshots.List(snapshots.ListSnapshotsOptions{ServerSlug: testServerSlug})
+		snaps, err := client.Servers.Snapshots.List(t.Context(), snapshots.ListSnapshotsOptions{ServerSlug: testServerSlug})
 		if err != nil {
 			t.Fatalf("list snapshots failed: %v", err)
 		}
@@ -63,42 +63,48 @@ func TestSnapshotsAPI(t *testing.T) {
 		if testServerSlug == "" {
 			t.Skip("no server created")
 		}
-		res, err := client.Servers.Snapshots.Take(snapshots.TakeSnapshotOptions{
+		res, err := client.Servers.Snapshots.Take(t.Context(), snapshots.TakeSnapshotOptions{
 			ServerSlug: testServerSlug,
 			Name:       fmt.Sprintf("test-snapshot-%d", time.Now().UnixMilli()),
 		})
 		if err != nil {
 			t.Fatalf("create snapshot failed: %v", err)
 		}
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
+		}
 		snapshotID = res.Snapshot.ID
-		waitForCallback(t, client, res.CallbackID)
 	})
 
 	t.Run("Restore_FromSnapshot", func(t *testing.T) {
 		if testServerSlug == "" || snapshotID == 0 {
 			t.Skip("no server or snapshot created")
 		}
-		callbackID, err := client.Servers.RestoreFromSnapshot(servers.RestoreFromSnapshotOptions{
+		callbackID, err := client.Servers.RestoreFromSnapshot(t.Context(), servers.RestoreFromSnapshotOptions{
 			ServerSlug: testServerSlug,
 			SnapshotId: fmt.Sprintf("%d", snapshotID),
 		})
 		if err != nil {
 			t.Fatalf("restore from snapshot failed: %v", err)
 		}
-		waitForCallback(t, client, callbackID)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		}
 	})
 
 	t.Run("Delete_Snapshot", func(t *testing.T) {
 		if testServerSlug == "" || snapshotID == 0 {
 			t.Skip("no server or snapshot created")
 		}
-		callbackID, err := client.Servers.Snapshots.Delete(snapshots.DeleteSnapshotOptions{
+		callbackID, err := client.Servers.Snapshots.Delete(t.Context(), snapshots.DeleteSnapshotOptions{
 			ServerSlug: testServerSlug,
 			SnapshotId: snapshotID,
 		})
 		if err != nil {
 			t.Fatalf("delete snapshot failed: %v", err)
 		}
-		waitForCallback(t, client, callbackID)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		}
 	})
 }

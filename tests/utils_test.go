@@ -2,39 +2,24 @@ package tests
 
 import (
 	"os"
-	"strings"
-	"testing"
-	"time"
+	"path/filepath"
+	"sync"
 
+	"github.com/joho/godotenv"
 	sdk "github.com/webdock-io/go-sdk"
-	"github.com/webdock-io/go-sdk/events"
 )
 
+var loadEnvOnce sync.Once
+
+func loadTestEnv() {
+	loadEnvOnce.Do(func() {
+		_ = godotenv.Load()
+		_ = godotenv.Load(filepath.Join("..", ".env"))
+	})
+}
+
 func getClient() sdk.Webdock {
+	loadTestEnv()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	return sdk.New(token)
-}
-
-func isE2EEnabled() bool {
-	return strings.ToLower(os.Getenv("WEBDOCK_E2E")) == "true"
-}
-
-func waitForCallback(t *testing.T, client sdk.Webdock, callbackID string) {
-	t.Helper()
-	if callbackID == "" {
-		return
-	}
-	for {
-		res, err := client.Events.List(events.ListEventsOptions{CallbackId: &callbackID})
-		if err != nil {
-			t.Fatalf("error fetching event log: %v", err)
-		}
-		if len(res.Events) > 0 {
-			ev := res.Events[0]
-			if ev.Status == "finished" || ev.Status == "error" {
-				return
-			}
-		}
-		time.Sleep(3 * time.Second)
-	}
 }

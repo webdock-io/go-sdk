@@ -9,14 +9,14 @@ import (
 )
 
 func TestProfilesAPI(t *testing.T) {
+	client := getClient()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	if token == "" {
 		t.Skip("WEBDOCK_TOKEN not set")
 	}
-	client := getClient()
 
 	t.Run("ListProfilesAndValidateSchema", func(t *testing.T) {
-		res, err := client.Profiles.List(profiles.ListProfilesOptions{LocationID: "dk"})
+		res, err := client.Profiles.List(t.Context(), profiles.ListProfilesOptions{LocationID: "dk"})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

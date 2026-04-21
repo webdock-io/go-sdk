@@ -8,14 +8,14 @@ import (
 )
 
 func TestWebhooksAPI(t *testing.T) {
+	client := getClient()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	if token == "" {
 		t.Skip("WEBDOCK_TOKEN not set")
 	}
-	client := getClient()
 
 	t.Run("ListHooksStructure", func(t *testing.T) {
-		res, err := client.Hooks.List(hooks.ListEventHooksOptions{})
+		res, err := client.Hooks.List(t.Context())
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -41,7 +41,7 @@ func TestWebhooksAPI(t *testing.T) {
 		randomTestURL := "https://http.dog/200.jpg"
 		testEventType := "backup"
 
-		created, err := client.Hooks.Create(hooks.CreateEventHookOptions{
+		created, err := client.Hooks.Create(t.Context(), hooks.CreateEventHookOptions{
 			CallbackUrl: randomTestURL,
 			EventType:   &testEventType,
 		})
@@ -66,7 +66,7 @@ func TestWebhooksAPI(t *testing.T) {
 			}
 		}
 
-		got, err := client.Hooks.GetByID(hooks.GetEventHookOptions{HookID: created.ID})
+		got, err := client.Hooks.GetByID(t.Context(), hooks.GetEventHookOptions{HookID: created.ID})
 		if err != nil {
 			t.Fatalf("getById failed: %v", err)
 		}
@@ -74,7 +74,7 @@ func TestWebhooksAPI(t *testing.T) {
 			t.Errorf("expected id %d, got %d", created.ID, got.ID)
 		}
 
-		if err := client.Hooks.Delete(hooks.DeleteEventHookOptions{HookID: created.ID}); err != nil {
+		if err := client.Hooks.Delete(t.Context(), hooks.DeleteEventHookOptions{HookID: created.ID}); err != nil {
 			t.Fatalf("delete hook failed: %v", err)
 		}
 	})

@@ -1,22 +1,41 @@
 package profiles
 
-import "net/url"
+import (
+	"context"
+	"encoding/json"
+	"net/url"
+)
 
 type ListProfilesOptions struct {
-	LocationID string
+	LocationID  string
+	ProfileSlug string
 }
 
-func (s *Profiles) List(opts ListProfilesOptions) ([]Profile, error) {
-	u := &url.URL{Path: "v1/profiles"}
+func (s *Profiles) List(ctx context.Context, opts ListProfilesOptions) ([]Profile, error) {
+	u := &url.URL{Path: "/profiles"}
+	q := url.Values{}
 	if opts.LocationID != "" {
-		q := url.Values{}
 		q.Set("locationId", opts.LocationID)
-		u.RawQuery = q.Encode()
 	}
-	var out []Profile
-	_, err := s.client.Do("GET", u.String(), nil, &out)
+	if opts.ProfileSlug != "" {
+		q.Set("profileSlug", opts.ProfileSlug)
+	}
+	u.RawQuery = q.Encode()
+
+	var raw json.RawMessage
+	_, err := s.client.Do(ctx, "GET", u.String(), nil, &raw)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+
+	var list []Profile
+	if err := json.Unmarshal(raw, &list); err == nil {
+		return list, nil
+	}
+
+	var single Profile
+	if err := json.Unmarshal(raw, &single); err != nil {
+		return nil, err
+	}
+	return []Profile{single}, nil
 }

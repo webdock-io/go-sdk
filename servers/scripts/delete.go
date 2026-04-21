@@ -1,6 +1,7 @@
 package serverscripts
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/webdock-io/go-sdk/client"
@@ -11,8 +12,8 @@ type DeleteScriptOptions struct {
 	ScriptId   int
 }
 
-func (s *ServerScripts) Delete(opts DeleteScriptOptions) (string, error) {
-	c, err := s.client.Do("DELETE", fmt.Sprintf("v1/servers/%s/scripts/%d", opts.ServerSlug, opts.ScriptId), nil, nil)
+func (s *ServerScripts) Delete(ctx context.Context, opts DeleteScriptOptions) (string, error) {
+	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/scripts/%d", opts.ServerSlug, opts.ScriptId), nil, nil)
 	if err != nil {
 		return "", err
 	}

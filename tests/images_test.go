@@ -3,19 +3,17 @@ package tests
 import (
 	"os"
 	"testing"
-
-	"github.com/webdock-io/go-sdk/images"
 )
 
 func TestImagesAPI(t *testing.T) {
+	client := getClient()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	if token == "" {
 		t.Skip("WEBDOCK_TOKEN not set")
 	}
-	client := getClient()
 
 	t.Run("ListImagesAndValidateFields", func(t *testing.T) {
-		res, err := client.Images.List(images.ListOSImagesOptions{})
+		res, err := client.Images.List(t.Context())
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

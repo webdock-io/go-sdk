@@ -8,16 +8,16 @@ import (
 )
 
 func TestSSHKeysAPI(t *testing.T) {
+	client := getClient()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	if token == "" {
 		t.Skip("WEBDOCK_TOKEN not set")
 	}
-	client := getClient()
 
 	var createdKeyID int64
 
 	t.Run("List", func(t *testing.T) {
-		keys, err := client.Account.PublicKeys.List()
+		keys, err := client.Account.PublicKeys.List(t.Context())
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -35,7 +35,7 @@ func TestSSHKeysAPI(t *testing.T) {
 	})
 
 	t.Run("Create", func(t *testing.T) {
-		created, err := client.Account.PublicKeys.Add(accountpublickeys.CreatePublicKeyOptions{
+		created, err := client.Account.PublicKeys.Add(t.Context(), accountpublickeys.CreatePublicKeyOptions{
 			Name: "test-go-sdk-key",
 			PublicKey: "-----BEGIN RSA PUBLIC KEY-----\n" +
 				"MEgCQQCo9+BpMRYQ/dL3DS2CyJxRF+j6ctbT3/Qp84+KeFhnii7NT7fELilKUSnx\n" +
@@ -55,7 +55,7 @@ func TestSSHKeysAPI(t *testing.T) {
 		if createdKeyID == 0 {
 			t.Skip("no key created to delete")
 		}
-		if err := client.Account.PublicKeys.Delete(accountpublickeys.DeletePublicOptions{ID: createdKeyID}); err != nil {
+		if err := client.Account.PublicKeys.Delete(t.Context(), accountpublickeys.DeletePublicOptions{ID: createdKeyID}); err != nil {
 			t.Fatalf("delete public key failed: %v", err)
 		}
 	})

@@ -16,6 +16,7 @@ go get github.com/webdock-io/go-sdk
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -25,14 +26,22 @@ import (
 func main() {
 	client := webdock.New("your-api-token-here")
 
-	pong, err := client.Webdock.Ping()
+	ctx := context.Background()
 
+	pong, err := client.Webdock.Ping(ctx)
 	if err != nil {
 		panic(err)
 	}
- 	fmt.Println(pong)
+	fmt.Println(pong)
+
+	serverList, err := client.Servers.List(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(len(serverList))
 }
 ```
+
 
 ## Documentation
 

@@ -1,6 +1,7 @@
 package servers
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 )
@@ -16,7 +17,7 @@ type ProfileDTO struct {
 	Description string `json:"description" tfsdk:"description"`
 }
 
-func (s *Servers) GetProfile(opts GetProfileOptions) (*ProfileDTO, error) {
+func (s *Servers) GetProfile(ctx context.Context, opts GetProfileOptions) (*ProfileDTO, error) {
 	u := &url.URL{Path: "v1/profiles"}
 	q := url.Values{}
 	if opts.LocationID != "" {
@@ -28,7 +29,7 @@ func (s *Servers) GetProfile(opts GetProfileOptions) (*ProfileDTO, error) {
 	u.RawQuery = q.Encode()
 
 	var out []ProfileDTO
-	_, err := s.client.Do("GET", u.String(), nil, &out)
+	_, err := s.client.Do(ctx, "GET", u.String(), nil, &out)
 	if err != nil {
 		return nil, err
 	}

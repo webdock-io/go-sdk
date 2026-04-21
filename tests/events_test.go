@@ -8,14 +8,14 @@ import (
 )
 
 func TestEventsAPI(t *testing.T) {
+	client := getClient()
 	token := os.Getenv("WEBDOCK_TOKEN")
 	if token == "" {
 		t.Skip("WEBDOCK_TOKEN not set")
 	}
-	client := getClient()
 
 	t.Run("ListAndValidateStructure", func(t *testing.T) {
-		res, err := client.Events.List(events.ListEventsOptions{})
+		res, err := client.Events.List(t.Context(), events.ListEventsOptions{})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

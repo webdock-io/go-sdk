@@ -1,10 +1,10 @@
 package images
 
-type ListOSImagesOptions struct{}
+import "context"
 
-func (s *Images) List(opts ListOSImagesOptions) ([]Image, error) {
+func (s *Images) List(ctx context.Context) ([]Image, error) {
 	var out []Image
-	_, err := s.client.Do("GET", "v1/images", nil, &out)
+	_, err := s.client.Do(ctx, "GET", "/images", nil, &out)
 	if err != nil {
 		return nil, err
 	}

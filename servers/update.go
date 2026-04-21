@@ -2,6 +2,7 @@ package servers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -14,13 +15,13 @@ type UpdateServerOptions struct {
 	NextActionDate string `json:"nextActionDate"`
 }
 
-func (s *Servers) Update(opts UpdateServerOptions) (*Server, error) {
+func (s *Servers) Update(ctx context.Context, opts UpdateServerOptions) (*Server, error) {
 	data, err := json.Marshal(opts)
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out Server
-	_, err = s.client.Do("PATCH", fmt.Sprintf("v1/servers/%s", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	_, err = s.client.Do(ctx, "PATCH", fmt.Sprintf("v1/servers/%s", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}

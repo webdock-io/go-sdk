@@ -1,11 +1,17 @@
 package client
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -23,12 +29,67 @@ type Client struct {
 	res        *http.Response
 }
 
+var (
+	requestLoggerOnce sync.Once
+	requestLogger     *log.Logger
+)
+
+func getRequestLogger() *log.Logger {
+	requestLoggerOnce.Do(func() {
+		logPath := strings.TrimSpace(os.Getenv("WEBDOCK_SDK_LOG_FILE"))
+		if logPath == "" {
+			logPath = "webdock-sdk.log"
+		}
+
+		file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+		if err != nil {
+			requestLogger = log.New(io.Discard, "", log.LstdFlags|log.Lmicroseconds)
+			return
+		}
+
+		requestLogger = log.New(file, "", log.LstdFlags|log.Lmicroseconds)
+	})
+
+	return requestLogger
+}
+
 func New(token string) *Client {
+	return NewWithBaseURL(token, "https://api.webdock.io")
+}
+
+func NewWithBaseURL(token, baseURL string) *Client {
+	baseURL = strings.TrimSpace(baseURL)
+	if baseURL == "" {
+		baseURL = "https://api.webdock.io"
+	}
+	if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+		baseURL = "https://" + baseURL
+	}
+
 	return &Client{
 		token:      token,
-		baseURL:    "api.webdock.io",
+		baseURL:    strings.TrimRight(baseURL, "/"),
 		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}
+}
+
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+type ResponseError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *ResponseError) Error() string {
+	if e == nil {
+		return ""
+	}
+	if e.Message == "" {
+		return fmt.Sprintf("webdock API returned status %d", e.StatusCode)
+	}
+	return fmt.Sprintf("webdock API returned status %d: %s", e.StatusCode, e.Message)
 }
 
 func (c *Client) GetHeader(name WebdockHeaderEnum) (string, error) {
@@ -38,36 +99,74 @@ func (c *Client) GetHeader(name WebdockHeaderEnum) (string, error) {
 	return c.res.Header.Get(string(name)), nil
 }
 
-func (c *Client) Do(method string, path string, payload io.Reader, out any) (*Client, error) {
+func (c *Client) Do(ctx context.Context, method string, path string, payload io.Reader, out any) (*Client, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	parsed, err := url.Parse(path)
 	if err != nil {
 		return nil, fmt.Errorf("invalid path: %w", err)
 	}
 
-	apiURL := url.URL{
-		Scheme:   "https",
-		Host:     c.baseURL,
-		Path:     parsed.Path,
-		RawQuery: parsed.RawQuery,
+	if parsed.Path == "" {
+		parsed.Path = "/"
+	}
+	if !strings.HasPrefix(parsed.Path, "/") {
+		parsed.Path = "/" + parsed.Path
+	}
+	if parsed.Path != "/v1" && !strings.HasPrefix(parsed.Path, "/v1/") {
+		parsed.Path = "/v1" + parsed.Path
 	}
 
-	req, err := http.NewRequest(method, apiURL.String(), payload)
+	baseURL, err := url.Parse(c.baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid base URL: %w", err)
+	}
+	apiURL := baseURL.ResolveReference(&url.URL{
+		Path:     parsed.Path,
+		RawQuery: parsed.RawQuery,
+	})
+
+	req, err := http.NewRequestWithContext(ctx, method, apiURL.String(), payload)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	req.Header.Set("X-Client", "go-sdk")
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-	if out != nil {
-		if err := json.NewDecoder(res.Body).Decode(out); err != nil {
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading response: %w", err)
+	}
+
+	if res.StatusCode >= http.StatusBadRequest {
+		apiErr := &ResponseError{StatusCode: res.StatusCode}
+		if len(body) > 0 {
+			var outErr ErrorResponse
+			if err := json.Unmarshal(body, &outErr); err == nil && outErr.Message != "" {
+				apiErr.Message = outErr.Message
+			} else {
+				apiErr.Message = strings.TrimSpace(string(body))
+			}
+		}
+		return nil, apiErr
+	}
+
+	if out != nil && len(body) > 0 {
+		if err := json.NewDecoder(bytes.NewReader(body)).Decode(out); err != nil {
 			return nil, fmt.Errorf("decoding response: %w", err)
 		}
 	}
 
-	return &Client{res: res}, nil
+	c.res = res
+	return c, nil
 }

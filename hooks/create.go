@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -12,13 +13,13 @@ type CreateEventHookOptions struct {
 	EventType   *string `json:"eventType,omitempty"`
 }
 
-func (s *Hooks) Create(opts CreateEventHookOptions) (*EventHookDTO, error) {
+func (s *Hooks) Create(ctx context.Context, opts CreateEventHookOptions) (*EventHookDTO, error) {
 	data, err := json.Marshal(opts)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request body: %w", err)
 	}
 	var out EventHookDTO
-	_, err = s.client.Do("POST", "v1/hooks", bytes.NewBuffer(data), &out)
+	_, err = s.client.Do(ctx, "POST", "v1/hooks", bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}

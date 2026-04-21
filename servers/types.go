@@ -59,6 +59,8 @@ type Server struct {
 
 type Servers struct {
 	client     *client.Client
+	Identity   ServerIdentity
+	Settings   ServerSettings
 	Scripts    serverscripts.ServerScripts
 	ShellUsers shellusers.ShellUsers
 	Snapshots  snapshots.Snapshots
@@ -67,6 +69,8 @@ type Servers struct {
 func New(c *client.Client) Servers {
 	return Servers{
 		client:     c,
+		Identity:   NewServerIdentity(c),
+		Settings:   NewServerSettings(c),
 		Scripts:    serverscripts.New(c),
 		ShellUsers: shellusers.New(c),
 		Snapshots:  snapshots.New(c),

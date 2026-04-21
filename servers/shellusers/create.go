@@ -2,6 +2,7 @@ package shellusers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -22,7 +23,7 @@ type CreatedShellUser struct {
 	CallbackID string    `json:"callbackId" tfsdk:"callback_id"`
 }
 
-func (s *ShellUsers) Create(opts CreateShellUserOptions) (*CreatedShellUser, error) {
+func (s *ShellUsers) Create(ctx context.Context, opts CreateShellUserOptions) (*CreatedShellUser, error) {
 	if opts.Group == "" {
 		opts.Group = "sudo"
 	}
@@ -34,7 +35,7 @@ func (s *ShellUsers) Create(opts CreateShellUserOptions) (*CreatedShellUser, err
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out ShellUser
-	c, err := s.client.Do("POST", fmt.Sprintf("v1/servers/%s/shellUsers", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/shellUsers", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}

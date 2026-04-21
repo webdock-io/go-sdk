@@ -1,14 +1,17 @@
 package servers
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type GetServerOptions struct {
 	Slug string
 }
 
-func (s *Servers) Get(opts GetServerOptions) (*Server, error) {
+func (s *Servers) Get(ctx context.Context, opts GetServerOptions) (*Server, error) {
 	var out Server
-	_, err := s.client.Do("GET", fmt.Sprintf("v1/servers/%s", opts.Slug), nil, &out)
+	_, err := s.client.Do(ctx, "GET", fmt.Sprintf("v1/servers/%s", opts.Slug), nil, &out)
 	if err != nil {
 		return nil, err
 	}

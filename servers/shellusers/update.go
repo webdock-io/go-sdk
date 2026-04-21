@@ -2,6 +2,7 @@ package shellusers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -12,13 +13,13 @@ type UpdateShellUserOptions struct {
 	PublicKeys  []int64 `json:"publicKeys"`
 }
 
-func (s *ShellUsers) Update(opts UpdateShellUserOptions) (*ShellUser, error) {
+func (s *ShellUsers) Update(ctx context.Context, opts UpdateShellUserOptions) (*ShellUser, error) {
 	data, err := json.Marshal(opts)
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out ShellUser
-	_, err = s.client.Do("PATCH", fmt.Sprintf("v1/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), bytes.NewBuffer(data), &out)
+	_, err = s.client.Do(ctx, "PATCH", fmt.Sprintf("v1/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}

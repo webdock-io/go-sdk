@@ -2,6 +2,7 @@ package serverscripts
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -21,13 +22,13 @@ type CreateScriptResponse struct {
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
-func (s *ServerScripts) Create(opts CreateScriptOptions) (*CreateScriptResponse, error) {
+func (s *ServerScripts) Create(ctx context.Context, opts CreateScriptOptions) (*CreateScriptResponse, error) {
 	data, err := json.Marshal(opts)
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out Script
-	c, err := s.client.Do("POST", fmt.Sprintf("v1/servers/%s/scripts", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/scripts", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}

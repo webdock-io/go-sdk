@@ -1,5 +1,7 @@
 package account
 
+import "context"
+
 type AccountInformation struct {
 	UserID                 int    `json:"userId" tfsdk:"user_id"`
 	CompanyName            string `json:"companyName" tfsdk:"company_name"`
@@ -13,9 +15,9 @@ type AccountInformation struct {
 	AccountBalanceCurrency string `json:"accountBalanceCurrency" tfsdk:"account_balance_currency"`
 }
 
-func (a *Account) Info() (*AccountInformation, error) {
+func (a *Account) Info(ctx context.Context) (*AccountInformation, error) {
 	var out AccountInformation
-	_, err := a.client.Do("GET", "v1/account/accountInformation", nil, &out)
+	_, err := a.client.Do(ctx, "GET", "v1/account/accountInformation", nil, &out)
 	if err != nil {
 		return nil, err
 	}

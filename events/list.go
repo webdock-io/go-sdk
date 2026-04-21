@@ -1,6 +1,7 @@
 package events
 
 import (
+	"context"
 	"net/url"
 	"strconv"
 
@@ -32,7 +33,7 @@ type ListEventsOptions struct {
 	PerPage    *int64
 }
 
-func (s *Events) List(opts ListEventsOptions) (*ListEventsResponse, error) {
+func (s *Events) List(ctx context.Context, opts ListEventsOptions) (*ListEventsResponse, error) {
 	u := &url.URL{Path: "v1/events"}
 	q := url.Values{}
 	if opts.CallbackId != nil {
@@ -50,7 +51,7 @@ func (s *Events) List(opts ListEventsOptions) (*ListEventsResponse, error) {
 	u.RawQuery = q.Encode()
 
 	var events []EventDTO
-	c, err := s.client.Do("GET", u.String(), nil, &events)
+	c, err := s.client.Do(ctx, "GET", u.String(), nil, &events)
 	if err != nil {
 		return nil, err
 	}

@@ -1,5 +1,7 @@
 package scripts
 
+import "context"
+
 type AccountScriptDTO struct {
 	ID          int64  `json:"id" tfsdk:"id"`
 	Name        string `json:"name" tfsdk:"name"`
@@ -10,11 +12,11 @@ type AccountScriptDTO struct {
 
 type AccountScriptsListResponse []AccountScriptDTO
 
-func (s *AccountScripts) List() (*AccountScriptsListResponse, error) {
+func (s *AccountScripts) List(ctx context.Context) (*AccountScriptsListResponse, error) {
 
 	var out AccountScriptsListResponse
 
-	_, err := s.client.Do("GET", "v1/account/scripts", nil, &out)
+	_, err := s.client.Do(ctx, "GET", "/account/scripts", nil, &out)
 	if err != nil {
 		return nil, err
 	}

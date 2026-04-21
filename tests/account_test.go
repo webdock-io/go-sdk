@@ -6,11 +6,11 @@ import (
 )
 
 func TestAccountAPI(t *testing.T) {
-	token := os.Getenv("WEBDOCK_TOKEN")
 	client := getClient()
+	token := os.Getenv("WEBDOCK_TOKEN")
 
 	t.Run("ValidateAuthenticationToken", func(t *testing.T) {
-		info, err := client.Account.Info()
+		info, err := client.Account.Info(t.Context())
 		if token != "" {
 			if err != nil {
 				t.Fatalf("expected success with valid token, got error: %v", err)
@@ -29,7 +29,7 @@ func TestAccountAPI(t *testing.T) {
 		if token == "" {
 			t.Skip("WEBDOCK_TOKEN not set")
 		}
-		info, err := client.Account.Info()
+		info, err := client.Account.Info(t.Context())
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

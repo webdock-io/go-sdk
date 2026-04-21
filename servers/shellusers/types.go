@@ -22,6 +22,11 @@ type ShellUsers struct {
 	client *client.Client
 }
 
+type UpdatedShellUser struct {
+	ShellUser  ShellUser `json:"shell_user" tfsdk:"shell_user"`
+	CallbackID string    `json:"callbackId" tfsdk:"callback_id"`
+}
+
 func New(c *client.Client) ShellUsers {
 	return ShellUsers{client: c}
 }

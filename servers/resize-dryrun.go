@@ -2,6 +2,7 @@ package servers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -39,13 +40,13 @@ type DryRunResizeServerOptions struct {
 	ProfileSlug string
 }
 
-func (s *Servers) ResizeDryRun(opts DryRunResizeServerOptions) (*ResizeDryRunResponse, error) {
+func (s *Servers) ResizeDryRun(ctx context.Context, opts DryRunResizeServerOptions) (*ResizeDryRunResponse, error) {
 	data, err := json.Marshal(map[string]string{"profileSlug": opts.ProfileSlug})
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out ResizeDryRunResponse
-	_, err = s.client.Do("POST", fmt.Sprintf("v1/servers/%s/actions/resize/dryrun", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	_, err = s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/resize/dryrun", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}
