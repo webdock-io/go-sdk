@@ -25,7 +25,7 @@ func (s *Snapshots) Take(ctx context.Context, opts TakeSnapshotOptions) (*TakeSn
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out Snapshot
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/snapshots", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/snapshot", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}
