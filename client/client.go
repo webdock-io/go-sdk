@@ -12,7 +12,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 )
 
 type WebdockHeaderEnum string
@@ -69,7 +68,7 @@ func NewWithBaseURL(token, baseURL string) *Client {
 	return &Client{
 		token:      token,
 		baseURL:    strings.TrimRight(baseURL, "/"),
-		httpClient: &http.Client{Timeout: 30 * time.Second},
+		httpClient: &http.Client{Timeout: 0},
 	}
 }
 
