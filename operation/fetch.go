@@ -42,17 +42,46 @@ func (o *Operation) WaitForEventToEnd(ctx context.Context, callbackID string) (*
 			continue
 		}
 
-		switch logs[0].Status {
-		case EventFinished:
-			return &WaitForEventResult{Data: logs[0].Message}, nil
-		case EventError:
-			return nil, fmt.Errorf("%s", logs[0].Message)
+		result, done, err := waitResultForEventLogs(logs)
+		if err != nil {
+			return nil, err
+		}
+		if done {
+			return result, nil
 		}
 
 		if err := waitForNextPoll(ctx, 3*time.Second); err != nil {
 			return nil, err
 		}
 	}
+}
+
+func waitResultForEventLogs(logs []EventLog) (*WaitForEventResult, bool, error) {
+	if len(logs) == 0 {
+		return nil, false, nil
+	}
+
+	allFinished := true
+	message := logs[0].Message
+
+	for _, event := range logs {
+		switch event.Status {
+		case EventFinished:
+			if message == "" {
+				message = event.Message
+			}
+		case EventError:
+			return nil, false, fmt.Errorf("%s", event.Message)
+		default:
+			allFinished = false
+		}
+	}
+
+	if allFinished {
+		return &WaitForEventResult{Data: message}, true, nil
+	}
+
+	return nil, false, nil
 }
 
 func waitForNextPoll(ctx context.Context, delay time.Duration) error {
