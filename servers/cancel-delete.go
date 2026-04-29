@@ -11,11 +11,15 @@ type CancelDeleteOptions struct {
 	ServerSlug string
 }
 
-func (s *Servers) CancelDelete(ctx context.Context, opts CancelDeleteOptions) (string, error) {
+type CancelDeleteResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) CancelDelete(ctx context.Context, opts CancelDeleteOptions) (*CancelDeleteResponse, error) {
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/uncancel", opts.ServerSlug), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &CancelDeleteResponse{CallbackID: callbackID}, nil
 }

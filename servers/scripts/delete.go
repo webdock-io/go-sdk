@@ -12,11 +12,15 @@ type DeleteScriptOptions struct {
 	ScriptId   int
 }
 
-func (s *ServerScripts) Delete(ctx context.Context, opts DeleteScriptOptions) (string, error) {
+type DeleteScriptResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *ServerScripts) Delete(ctx context.Context, opts DeleteScriptOptions) (*DeleteScriptResponse, error) {
 	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/scripts/%d", opts.ServerSlug, opts.ScriptId), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &DeleteScriptResponse{CallbackID: callbackID}, nil
 }

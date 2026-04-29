@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -22,7 +23,9 @@ func TestServersAPI(t *testing.T) {
 		if testServerSlug == "" {
 			return
 		}
-		if err := client.Servers.Delete(t.Context(), servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+		if _, err := client.Servers.Delete(cleanupCtx, servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
 			t.Logf("cleanup: delete server %q failed: %v", testServerSlug, err)
 		}
 	})
@@ -112,12 +115,12 @@ func TestServersAPI(t *testing.T) {
 		if testServerSlug == "" {
 			t.Skip("no server created")
 		}
-		callbackID, err := client.Servers.Reboot(t.Context(), servers.RebootServerOptions{Slug: testServerSlug})
+		res, err := client.Servers.Reboot(t.Context(), servers.RebootServerOptions{Slug: testServerSlug})
 		if err != nil {
 			t.Fatalf("reboot server failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 
@@ -125,12 +128,12 @@ func TestServersAPI(t *testing.T) {
 		if testServerSlug == "" {
 			t.Skip("no server created")
 		}
-		callbackID, err := client.Servers.Stop(t.Context(), servers.StopServerOptions{Slug: testServerSlug})
+		res, err := client.Servers.Stop(t.Context(), servers.StopServerOptions{Slug: testServerSlug})
 		if err != nil {
 			t.Fatalf("stop server failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 
@@ -138,12 +141,12 @@ func TestServersAPI(t *testing.T) {
 		if testServerSlug == "" {
 			t.Skip("no server created")
 		}
-		callbackID, err := client.Servers.Start(t.Context(), servers.StartServerOptions{Slug: testServerSlug})
+		res, err := client.Servers.Start(t.Context(), servers.StartServerOptions{Slug: testServerSlug})
 		if err != nil {
 			t.Fatalf("start server failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 
@@ -167,15 +170,15 @@ func TestServersAPI(t *testing.T) {
 		if testServerSlug == "" {
 			t.Skip("no server created")
 		}
-		callbackID, err := client.Servers.Reinstall(t.Context(), servers.ReinstallServerOptions{
+		res, err := client.Servers.Reinstall(t.Context(), servers.ReinstallServerOptions{
 			Slug:      testServerSlug,
 			ImageSlug: "webdock-ubuntu-noble-cloud",
 		})
 		if err != nil {
 			t.Fatalf("reinstall server failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 }

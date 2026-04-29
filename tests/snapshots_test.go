@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -24,7 +25,9 @@ func TestSnapshotsAPI(t *testing.T) {
 		if testServerSlug == "" {
 			return
 		}
-		if err := client.Servers.Delete(t.Context(), servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+		if _, err := client.Servers.Delete(cleanupCtx, servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
 			t.Logf("cleanup: delete server %q failed: %v", testServerSlug, err)
 		}
 	})
@@ -80,15 +83,15 @@ func TestSnapshotsAPI(t *testing.T) {
 		if testServerSlug == "" || snapshotID == 0 {
 			t.Skip("no server or snapshot created")
 		}
-		callbackID, err := client.Servers.RestoreFromSnapshot(t.Context(), servers.RestoreFromSnapshotOptions{
+		res, err := client.Servers.RestoreFromSnapshot(t.Context(), servers.RestoreFromSnapshotOptions{
 			ServerSlug: testServerSlug,
 			SnapshotId: fmt.Sprintf("%d", snapshotID),
 		})
 		if err != nil {
 			t.Fatalf("restore from snapshot failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 
@@ -96,15 +99,15 @@ func TestSnapshotsAPI(t *testing.T) {
 		if testServerSlug == "" || snapshotID == 0 {
 			t.Skip("no server or snapshot created")
 		}
-		callbackID, err := client.Servers.Snapshots.Delete(t.Context(), snapshots.DeleteSnapshotOptions{
+		res, err := client.Servers.Snapshots.Delete(t.Context(), snapshots.DeleteSnapshotOptions{
 			ServerSlug: testServerSlug,
 			SnapshotId: snapshotID,
 		})
 		if err != nil {
 			t.Fatalf("delete snapshot failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 }

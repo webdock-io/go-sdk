@@ -12,11 +12,15 @@ type DeleteShellUserOptions struct {
 	ShellUserId int64
 }
 
-func (s *ShellUsers) Delete(ctx context.Context, opts DeleteShellUserOptions) (string, error) {
+type DeleteShellUserResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *ShellUsers) Delete(ctx context.Context, opts DeleteShellUserOptions) (*DeleteShellUserResponse, error) {
 	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &DeleteShellUserResponse{CallbackID: callbackID}, nil
 }

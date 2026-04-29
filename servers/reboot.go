@@ -11,11 +11,15 @@ type RebootServerOptions struct {
 	Slug string
 }
 
-func (s *Servers) Reboot(ctx context.Context, opts RebootServerOptions) (string, error) {
+type RebootServerResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) Reboot(ctx context.Context, opts RebootServerOptions) (*RebootServerResponse, error) {
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/reboot", opts.Slug), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &RebootServerResponse{CallbackID: callbackID}, nil
 }

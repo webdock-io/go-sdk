@@ -12,11 +12,15 @@ type ExecuteScriptOptions struct {
 	ScriptId   int
 }
 
-func (s *ServerScripts) Execute(ctx context.Context, opts ExecuteScriptOptions) (string, error) {
+type ExecuteScriptResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *ServerScripts) Execute(ctx context.Context, opts ExecuteScriptOptions) (*ExecuteScriptResponse, error) {
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/scripts/%d/execute", opts.ServerSlug, opts.ScriptId), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &ExecuteScriptResponse{CallbackID: callbackID}, nil
 }

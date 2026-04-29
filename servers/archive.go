@@ -11,11 +11,15 @@ type ArchiveServerOptions struct {
 	Slug string
 }
 
-func (s *Servers) Archive(ctx context.Context, opts ArchiveServerOptions) (string, error) {
+type ArchiveServerResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) Archive(ctx context.Context, opts ArchiveServerOptions) (*ArchiveServerResponse, error) {
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/suspend", opts.Slug), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &ArchiveServerResponse{CallbackID: callbackID}, nil
 }

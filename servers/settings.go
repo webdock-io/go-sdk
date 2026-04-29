@@ -24,16 +24,20 @@ type UpdateSettingsOptions struct {
 	UpdateLetsencrypt bool   `json:"updateLetsencrypt" tfsdk:"update_letsencrypt"`
 }
 
-func (s *ServerSettings) Update(ctx context.Context, opts UpdateSettingsOptions) (string, error) {
+type UpdateSettingsResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *ServerSettings) Update(ctx context.Context, opts UpdateSettingsOptions) (*UpdateSettingsResponse, error) {
 	body, err := json.Marshal(opts)
 	if err != nil {
-		return "", fmt.Errorf("marshaling request: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/actions/settings", opts.ServerSlug), bytes.NewBuffer(body), nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &UpdateSettingsResponse{CallbackID: callbackID}, nil
 }

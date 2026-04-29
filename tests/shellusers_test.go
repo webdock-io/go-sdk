@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -24,13 +25,16 @@ func TestShellUsersAPI(t *testing.T) {
 	var newTestPubKeyID int64
 
 	t.Cleanup(func() {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+
 		if newTestPubKeyID != 0 {
-			if err := client.Account.PublicKeys.Delete(t.Context(), accountpublickeys.DeletePublicOptions{ID: newTestPubKeyID}); err != nil {
+			if err := client.Account.PublicKeys.Delete(cleanupCtx, accountpublickeys.DeletePublicOptions{ID: newTestPubKeyID}); err != nil {
 				t.Logf("cleanup: delete public key %d failed: %v", newTestPubKeyID, err)
 			}
 		}
 		if testServerSlug != "" {
-			if err := client.Servers.Delete(t.Context(), servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
+			if _, err := client.Servers.Delete(cleanupCtx, servers.DeleteServerOptions{Slug: testServerSlug}); err != nil {
 				t.Logf("cleanup: delete server %q failed: %v", testServerSlug, err)
 			}
 		}
@@ -162,15 +166,15 @@ func TestShellUsersAPI(t *testing.T) {
 		if testServerSlug == "" || testUserID == 0 {
 			t.Skip("no server or shell user created")
 		}
-		callbackID, err := client.Servers.ShellUsers.Delete(t.Context(), shellusers.DeleteShellUserOptions{
+		res, err := client.Servers.ShellUsers.Delete(t.Context(), shellusers.DeleteShellUserOptions{
 			ServerSlug:  testServerSlug,
 			ShellUserId: testUserID,
 		})
 		if err != nil {
 			t.Fatalf("delete shell user failed: %v", err)
 		}
-		if _, err := client.Operation.WaitForEventToEnd(t.Context(), callbackID); err != nil {
-			t.Fatalf("wait for callback %q failed: %v", callbackID, err)
+		if _, err := client.Operation.WaitForEventToEnd(t.Context(), res.CallbackID); err != nil {
+			t.Fatalf("wait for callback %q failed: %v", res.CallbackID, err)
 		}
 	})
 }

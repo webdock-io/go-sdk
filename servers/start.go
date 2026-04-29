@@ -11,11 +11,15 @@ type StartServerOptions struct {
 	Slug string
 }
 
-func (s *Servers) Start(ctx context.Context, opts StartServerOptions) (string, error) {
+type StartServerResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) Start(ctx context.Context, opts StartServerOptions) (*StartServerResponse, error) {
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/start", opts.Slug), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &StartServerResponse{CallbackID: callbackID}, nil
 }

@@ -14,15 +14,19 @@ type ReinstallServerOptions struct {
 	ImageSlug string
 }
 
-func (s *Servers) Reinstall(ctx context.Context, opts ReinstallServerOptions) (string, error) {
+type ReinstallServerResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) Reinstall(ctx context.Context, opts ReinstallServerOptions) (*ReinstallServerResponse, error) {
 	data, err := json.Marshal(map[string]string{"imageSlug": opts.ImageSlug})
 	if err != nil {
-		return "", fmt.Errorf("marshaling request: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/reinstall", opts.Slug), bytes.NewBuffer(data), nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &ReinstallServerResponse{CallbackID: callbackID}, nil
 }

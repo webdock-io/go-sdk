@@ -14,15 +14,19 @@ type RestoreFromSnapshotOptions struct {
 	SnapshotId string
 }
 
-func (s *Servers) RestoreFromSnapshot(ctx context.Context, opts RestoreFromSnapshotOptions) (string, error) {
+type RestoreFromSnapshotResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) RestoreFromSnapshot(ctx context.Context, opts RestoreFromSnapshotOptions) (*RestoreFromSnapshotResponse, error) {
 	data, err := json.Marshal(map[string]string{"snapshotId": opts.SnapshotId})
 	if err != nil {
-		return "", fmt.Errorf("marshaling request: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/restore", opts.ServerSlug), bytes.NewBuffer(data), nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &RestoreFromSnapshotResponse{CallbackID: callbackID}, nil
 }

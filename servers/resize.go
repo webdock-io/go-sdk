@@ -14,15 +14,19 @@ type ResizeServerOptions struct {
 	ProfileSlug string
 }
 
-func (s *Servers) Resize(ctx context.Context, opts ResizeServerOptions) (string, error) {
+type ResizeServerResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Servers) Resize(ctx context.Context, opts ResizeServerOptions) (*ResizeServerResponse, error) {
 	data, err := json.Marshal(map[string]string{"profileSlug": opts.ProfileSlug})
 	if err != nil {
-		return "", fmt.Errorf("marshaling request: %w", err)
+		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/resize", opts.Slug), bytes.NewBuffer(data), nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &ResizeServerResponse{CallbackID: callbackID}, nil
 }

@@ -12,11 +12,15 @@ type DeleteSnapshotOptions struct {
 	SnapshotId int64
 }
 
-func (s *Snapshots) Delete(ctx context.Context, opts DeleteSnapshotOptions) (string, error) {
+type DeleteSnapshotResponse struct {
+	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+}
+
+func (s *Snapshots) Delete(ctx context.Context, opts DeleteSnapshotOptions) (*DeleteSnapshotResponse, error) {
 	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/snapshots/%d", opts.ServerSlug, opts.SnapshotId), nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return callbackID, nil
+	return &DeleteSnapshotResponse{CallbackID: callbackID}, nil
 }
