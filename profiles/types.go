@@ -15,13 +15,14 @@ type Price struct {
 type Platform string
 
 type Profile struct {
-	Slug     string   `json:"slug" tfsdk:"slug"`
-	Name     string   `json:"name" tfsdk:"name"`
-	RAM      int      `json:"ram" tfsdk:"ram"`
-	Disk     int      `json:"disk" tfsdk:"disk"`
-	CPU      CPU      `json:"cpu" tfsdk:"cpu"`
-	Price    Price    `json:"price" tfsdk:"price"`
-	Platform Platform `json:"platform" tfsdk:"platform"`
+	Slug             string   `json:"slug" tfsdk:"slug"`
+	Name             string   `json:"name" tfsdk:"name"`
+	RAM              int      `json:"ram" tfsdk:"ram"`
+	Disk             int      `json:"disk" tfsdk:"disk"`
+	CPU              CPU      `json:"cpu" tfsdk:"cpu"`
+	Price            Price    `json:"price" tfsdk:"price"`
+	NetworkBandwidth int      `json:"network_bandwidth" tfsdk:"network_bandwidth"`
+	Platform         Platform `json:"platform" tfsdk:"platform"`
 }
 
 type Profiles struct {

@@ -21,6 +21,13 @@ const (
 	XTotalCount WebdockHeaderEnum = "X-Total-Count"
 )
 
+const (
+	DefaultBaseURL = "https://api.webdock.io"
+	APIBasePath    = "/v1"
+	APIVersion     = "1.1.1"
+	SDKIdentifier  = "go-sdk/" + APIVersion
+)
+
 type Client struct {
 	token      string
 	baseURL    string
@@ -53,13 +60,13 @@ func getRequestLogger() *log.Logger {
 }
 
 func New(token string) *Client {
-	return NewWithBaseURL(token, "https://api.webdock.io")
+	return NewWithBaseURL(token, DefaultBaseURL)
 }
 
 func NewWithBaseURL(token, baseURL string) *Client {
 	baseURL = strings.TrimSpace(baseURL)
 	if baseURL == "" {
-		baseURL = "https://api.webdock.io"
+		baseURL = DefaultBaseURL
 	}
 	if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
 		baseURL = "https://" + baseURL
@@ -114,8 +121,8 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 	if !strings.HasPrefix(parsed.Path, "/") {
 		parsed.Path = "/" + parsed.Path
 	}
-	if parsed.Path != "/v1" && !strings.HasPrefix(parsed.Path, "/v1/") {
-		parsed.Path = "/v1" + parsed.Path
+	if parsed.Path != APIBasePath && !strings.HasPrefix(parsed.Path, APIBasePath+"/") {
+		parsed.Path = APIBasePath + parsed.Path
 	}
 
 	baseURL, err := url.Parse(c.baseURL)
@@ -134,7 +141,7 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	req.Header.Set("X-Client", "go-sdk")
+	req.Header.Set("X-Client", SDKIdentifier)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {

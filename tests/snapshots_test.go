@@ -34,7 +34,8 @@ func TestSnapshotsAPI(t *testing.T) {
 
 	t.Run("Setup_CreateTemporaryServer", func(t *testing.T) {
 		created, err := client.Servers.CreateFromImage(t.Context(), servers.CreateServerFromImageOptions{
-			Name:        fmt.Sprintf("temp-%d", time.Now().UnixMilli()),
+			Name:        fmt.Sprintf("snapshot-file-test:temp-%d", time.Now().UnixMilli()),
+			Slug:        fmt.Sprintf("snapshot-file-test:temp-%d", time.Now().UnixMilli()),
 			LocationId:  "dk",
 			ProfileSlug: "vps-epyc-pro-2025",
 			ImageSlug:   "webdock-ubuntu-noble-cloud",
