@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/webdock-io/go-sdk/client"
 )
 
 type UpdateShellUserOptions struct {
@@ -19,9 +21,11 @@ func (s *ShellUsers) Update(ctx context.Context, opts UpdateShellUserOptions) (*
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out ShellUser
-	_, err = s.client.Do(ctx, "PATCH", fmt.Sprintf("v1/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), bytes.NewBuffer(data), &out)
+	c, err := s.client.Do(ctx, "PATCH", fmt.Sprintf("v1/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}
+	callbackID, _ := c.GetHeader(client.CallbackID)
+	out.CallbackID = callbackID
 	return &out, nil
 }

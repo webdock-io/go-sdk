@@ -34,5 +34,15 @@ func (s *Snapshots) Take(ctx context.Context, opts TakeSnapshotOptions) (*TakeSn
 }
 
 func (s *Snapshots) Create(ctx context.Context, opts TakeSnapshotOptions) (*TakeSnapshotResponse, error) {
-	return s.Take(ctx, opts)
+	data, err := json.Marshal(map[string]string{"name": opts.Name})
+	if err != nil {
+		return nil, fmt.Errorf("marshaling request: %w", err)
+	}
+	var out Snapshot
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/snapshots", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	if err != nil {
+		return nil, err
+	}
+	callbackID, _ := c.GetHeader(client.CallbackID)
+	return &TakeSnapshotResponse{Snapshot: out, CallbackID: callbackID}, nil
 }

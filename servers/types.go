@@ -136,6 +136,7 @@ func (s *Server) UnmarshalJSON(data []byte) error {
 
 type Servers struct {
 	client     *client.Client
+	IPBlocks   ServerIPBlocks
 	Identity   ServerIdentity
 	Settings   ServerSettings
 	Scripts    serverscripts.ServerScripts
@@ -146,6 +147,7 @@ type Servers struct {
 func New(c *client.Client) Servers {
 	return Servers{
 		client:     c,
+		IPBlocks:   NewServerIPBlocks(c),
 		Identity:   NewServerIdentity(c),
 		Settings:   NewServerSettings(c),
 		Scripts:    serverscripts.New(c),

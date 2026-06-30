@@ -9,10 +9,10 @@ import (
 
 type UpdateServerOptions struct {
 	ServerSlug     string `json:"-"`
-	Name           string `json:"name"`
-	Description    string `json:"description"`
-	Notes          string `json:"notes"`
-	NextActionDate string `json:"nextActionDate"`
+	Name           string `json:"name,omitempty"`
+	Description    string `json:"description,omitempty"`
+	Notes          string `json:"notes,omitempty"`
+	NextActionDate string `json:"nextActionDate,omitempty"`
 }
 
 func (s *Servers) Update(ctx context.Context, opts UpdateServerOptions) (*Server, error) {

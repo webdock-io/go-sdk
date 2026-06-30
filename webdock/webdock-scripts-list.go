@@ -7,6 +7,7 @@ type Script struct {
 	Name        string `json:"name" tfsdk:"name"`
 	Description string `json:"description" tfsdk:"description"`
 	Filename    string `json:"filename" tfsdk:"filename"`
+	Slug        string `json:"slug" tfsdk:"slug"`
 	Content     string `json:"content" tfsdk:"content"`
 }
 

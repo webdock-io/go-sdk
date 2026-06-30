@@ -11,7 +11,8 @@ import (
 
 type CreateScriptOptions struct {
 	ServerSlug           string `json:"-"`
-	ScriptId             int    `json:"scriptId"`
+	ScriptId             int    `json:"-"`
+	ScriptSlug           string `json:"-"`
 	Path                 string `json:"path"`
 	MakeScriptExecutable bool   `json:"makeScriptExecutable,omitempty"`
 	ExecuteImmediately   bool   `json:"executeImmediately,omitempty"`
@@ -23,7 +24,7 @@ type CreateScriptResponse struct {
 }
 
 func (s *ServerScripts) Create(ctx context.Context, opts CreateScriptOptions) (*CreateScriptResponse, error) {
-	data, err := json.Marshal(opts)
+	data, err := json.Marshal(createScriptPayload(opts))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
@@ -34,4 +35,22 @@ func (s *ServerScripts) Create(ctx context.Context, opts CreateScriptOptions) (*
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
 	return &CreateScriptResponse{Script: out, CallbackID: callbackID}, nil
+}
+
+func createScriptPayload(opts CreateScriptOptions) map[string]any {
+	payload := map[string]any{
+		"path": opts.Path,
+	}
+	if opts.ScriptSlug != "" {
+		payload["scriptId"] = opts.ScriptSlug
+	} else {
+		payload["scriptId"] = opts.ScriptId
+	}
+	if opts.MakeScriptExecutable {
+		payload["makeScriptExecutable"] = opts.MakeScriptExecutable
+	}
+	if opts.ExecuteImmediately {
+		payload["executeImmediately"] = opts.ExecuteImmediately
+	}
+	return payload
 }

@@ -10,8 +10,11 @@ import (
 )
 
 type ReinstallServerOptions struct {
-	Slug      string
-	ImageSlug string
+	Slug            string `json:"-"`
+	ImageSlug       string `json:"imageSlug"`
+	UserScriptID    int64  `json:"userScriptId,omitempty"`
+	UserScriptSlug  string `json:"-"`
+	DeleteSnapshots bool   `json:"deleteSnapshots,omitempty"`
 }
 
 type ReinstallServerResponse struct {
@@ -19,7 +22,7 @@ type ReinstallServerResponse struct {
 }
 
 func (s *Servers) Reinstall(ctx context.Context, opts ReinstallServerOptions) (*ReinstallServerResponse, error) {
-	data, err := json.Marshal(map[string]string{"imageSlug": opts.ImageSlug})
+	data, err := json.Marshal(reinstallServerPayload(opts))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
@@ -29,4 +32,19 @@ func (s *Servers) Reinstall(ctx context.Context, opts ReinstallServerOptions) (*
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
 	return &ReinstallServerResponse{CallbackID: callbackID}, nil
+}
+
+func reinstallServerPayload(opts ReinstallServerOptions) map[string]any {
+	payload := map[string]any{
+		"imageSlug": opts.ImageSlug,
+	}
+	if opts.DeleteSnapshots {
+		payload["deleteSnapshots"] = opts.DeleteSnapshots
+	}
+	if opts.UserScriptSlug != "" {
+		payload["userScriptId"] = opts.UserScriptSlug
+	} else if opts.UserScriptID != 0 {
+		payload["userScriptId"] = opts.UserScriptID
+	}
+	return payload
 }

@@ -16,6 +16,7 @@ type CreateServerFromImageOptions struct {
 	ImageSlug      string `json:"imageSlug,omitempty"`
 	Virtualization string `json:"virtualization,omitempty"`
 	UserScriptID   int64  `json:"userScriptId,omitempty"`
+	UserScriptSlug string `json:"-"`
 	Slug           string `json:"slug,omitempty"`
 }
 
@@ -26,6 +27,7 @@ type CreateServerFromSnapshotOptions struct {
 	SnapshotId     int    `json:"snapshotId"`
 	Virtualization string `json:"virtualization,omitempty"`
 	UserScriptID   int64  `json:"userScriptId,omitempty"`
+	UserScriptSlug string `json:"-"`
 	Slug           string `json:"slug,omitempty"`
 }
 
@@ -37,6 +39,7 @@ type CreateServerOptions struct {
 	SnapshotId     *int   `json:"snapshotId,omitempty"`
 	Virtualization string `json:"virtualization,omitempty"`
 	UserScriptID   int64  `json:"userScriptId,omitempty"`
+	UserScriptSlug string `json:"-"`
 	Slug           string `json:"slug,omitempty"`
 }
 
@@ -46,7 +49,7 @@ type CreatedServer struct {
 }
 
 func (s *Servers) Create(ctx context.Context, opts CreateServerOptions) (*CreatedServer, error) {
-	data, err := json.Marshal(opts)
+	data, err := json.Marshal(createServerPayload(opts))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
@@ -59,6 +62,34 @@ func (s *Servers) Create(ctx context.Context, opts CreateServerOptions) (*Create
 	return &CreatedServer{Server: out, CallbackID: callbackID}, nil
 }
 
+func createServerPayload(opts CreateServerOptions) map[string]any {
+	payload := map[string]any{
+		"name":       opts.Name,
+		"locationId": opts.LocationId,
+	}
+	if opts.ProfileSlug != "" {
+		payload["profileSlug"] = opts.ProfileSlug
+	}
+	if opts.ImageSlug != "" {
+		payload["imageSlug"] = opts.ImageSlug
+	}
+	if opts.SnapshotId != nil {
+		payload["snapshotId"] = *opts.SnapshotId
+	}
+	if opts.Virtualization != "" {
+		payload["virtualization"] = opts.Virtualization
+	}
+	if opts.UserScriptSlug != "" {
+		payload["userScriptId"] = opts.UserScriptSlug
+	} else if opts.UserScriptID != 0 {
+		payload["userScriptId"] = opts.UserScriptID
+	}
+	if opts.Slug != "" {
+		payload["slug"] = opts.Slug
+	}
+	return payload
+}
+
 func (s *Servers) CreateFromImage(ctx context.Context, opts CreateServerFromImageOptions) (*CreatedServer, error) {
 	return s.Create(ctx, CreateServerOptions{
 		Name:           opts.Name,
@@ -67,6 +98,7 @@ func (s *Servers) CreateFromImage(ctx context.Context, opts CreateServerFromImag
 		ImageSlug:      opts.ImageSlug,
 		Virtualization: opts.Virtualization,
 		UserScriptID:   opts.UserScriptID,
+		UserScriptSlug: opts.UserScriptSlug,
 		Slug:           opts.Slug,
 	})
 }
@@ -79,6 +111,7 @@ func (s *Servers) CreateFromSnapshot(ctx context.Context, opts CreateServerFromS
 		SnapshotId:     &opts.SnapshotId,
 		Virtualization: opts.Virtualization,
 		UserScriptID:   opts.UserScriptID,
+		UserScriptSlug: opts.UserScriptSlug,
 		Slug:           opts.Slug,
 	})
 }

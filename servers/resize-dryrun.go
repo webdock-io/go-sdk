@@ -8,20 +8,26 @@ import (
 )
 
 type WarningDTO struct {
-	Type    string      `json:"type" tfsdk:"type"`
-	Message string      `json:"message" tfsdk:"message"`
-	Data    interface{} `json:"data" tfsdk:"data"`
+	Type    string         `json:"type" tfsdk:"type"`
+	Message string         `json:"message" tfsdk:"message"`
+	Data    map[string]any `json:"data" tfsdk:"data"`
+}
+
+type ChargeSummaryPriceDTO struct {
+	Amount   float64 `json:"amount" tfsdk:"amount"`
+	Currency string  `json:"currency" tfsdk:"currency"`
 }
 
 type ChargeSummaryItemDTO struct {
-	Description string  `json:"description,omitempty" tfsdk:"description"`
-	Amount      float64 `json:"amount,omitempty" tfsdk:"amount"`
-	Currency    string  `json:"currency,omitempty" tfsdk:"currency"`
+	Text     string                `json:"text" tfsdk:"text"`
+	Price    ChargeSummaryPriceDTO `json:"price" tfsdk:"price"`
+	IsRefund bool                  `json:"isRefund" tfsdk:"is_refund"`
 }
 
 type ChargeSummaryTotalDTO struct {
-	Amount   float64 `json:"amount,omitempty" tfsdk:"amount"`
-	Currency string  `json:"currency,omitempty" tfsdk:"currency"`
+	SubTotal ChargeSummaryPriceDTO `json:"subTotal" tfsdk:"sub_total"`
+	VAT      ChargeSummaryPriceDTO `json:"vat" tfsdk:"vat"`
+	Total    ChargeSummaryPriceDTO `json:"total" tfsdk:"total"`
 }
 
 type ChargeSummaryDTO struct {

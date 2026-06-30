@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/webdock-io/go-sdk/client"
 )
@@ -12,6 +13,7 @@ import (
 type RestoreFromSnapshotOptions struct {
 	ServerSlug string
 	SnapshotId string
+	SnapshotID int64
 }
 
 type RestoreFromSnapshotResponse struct {
@@ -19,7 +21,7 @@ type RestoreFromSnapshotResponse struct {
 }
 
 func (s *Servers) RestoreFromSnapshot(ctx context.Context, opts RestoreFromSnapshotOptions) (*RestoreFromSnapshotResponse, error) {
-	data, err := json.Marshal(map[string]string{"snapshotId": opts.SnapshotId})
+	data, err := json.Marshal(restoreFromSnapshotPayload(opts))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
@@ -29,4 +31,17 @@ func (s *Servers) RestoreFromSnapshot(ctx context.Context, opts RestoreFromSnaps
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
 	return &RestoreFromSnapshotResponse{CallbackID: callbackID}, nil
+}
+
+func restoreFromSnapshotPayload(opts RestoreFromSnapshotOptions) map[string]any {
+	if opts.SnapshotID != 0 {
+		return map[string]any{"snapshotId": opts.SnapshotID}
+	}
+	if opts.SnapshotId != "" {
+		if id, err := strconv.ParseInt(opts.SnapshotId, 10, 64); err == nil {
+			return map[string]any{"snapshotId": id}
+		}
+		return map[string]any{"snapshotId": opts.SnapshotId}
+	}
+	return map[string]any{"snapshotId": int64(0)}
 }

@@ -16,6 +16,8 @@ type ShellUser struct {
 	Shell      string         `json:"shell" tfsdk:"shell"`
 	PublicKeys []PublicKeyDTO `json:"publicKeys" tfsdk:"public_keys"`
 	Created    string         `json:"created" tfsdk:"created"`
+	Updated    string         `json:"updated" tfsdk:"updated"`
+	CallbackID string         `json:"-" tfsdk:"callback_id"`
 }
 
 type ShellUsers struct {
