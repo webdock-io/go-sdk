@@ -25,7 +25,8 @@ const (
 	DefaultBaseURL = "https://api.webdock.io"
 	APIBasePath    = "/v1"
 	APIVersion     = "1.1.1"
-	SDKIdentifier  = "go-sdk/" + APIVersion
+	SDKClient      = "go-sdk"
+	SDKIdentifier  = SDKClient + "/" + APIVersion
 )
 
 type Client struct {
@@ -138,10 +139,14 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	req.Header.Set("X-Client", SDKIdentifier)
+	req.Header.Set("X-Client", SDKClient)
+	req.Header.Set("X-Application", applicationName())
+	req.Header.Set("X-Version", APIVersion)
+	if c.token != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
+	}
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -175,4 +180,12 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 
 	c.res = res
 	return c, nil
+}
+
+func applicationName() string {
+	hostname, err := os.Hostname()
+	if err != nil || strings.TrimSpace(hostname) == "" {
+		return "unknown"
+	}
+	return hostname
 }

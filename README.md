@@ -42,6 +42,22 @@ func main() {
 }
 ```
 
+Server webserver operations are available under `client.Servers.Webserver`:
+
+```go
+import "github.com/webdock-io/go-sdk/servers"
+
+status, err := client.Servers.Webserver.DB.Status(ctx, servers.DatabaseBackupStatusOptions{
+	ServerSlug: "my-server",
+})
+
+_, err = client.Servers.Webserver.WordPress.EnableBasicAuth(ctx, servers.EnableBasicAuthOptions{
+	ServerSlug: "my-server",
+	Path:       "/staging",
+	Username:   "preview",
+	Password:   "secret",
+})
+```
 
 ## Documentation
 

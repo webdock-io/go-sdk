@@ -139,6 +139,7 @@ type Servers struct {
 	IPBlocks   ServerIPBlocks
 	Identity   ServerIdentity
 	Settings   ServerSettings
+	Webserver  ServerWebserver
 	Scripts    serverscripts.ServerScripts
 	ShellUsers shellusers.ShellUsers
 	Snapshots  snapshots.Snapshots
@@ -150,6 +151,7 @@ func New(c *client.Client) Servers {
 		IPBlocks:   NewServerIPBlocks(c),
 		Identity:   NewServerIdentity(c),
 		Settings:   NewServerSettings(c),
+		Webserver:  NewServerWebserver(c),
 		Scripts:    serverscripts.New(c),
 		ShellUsers: shellusers.New(c),
 		Snapshots:  snapshots.New(c),
