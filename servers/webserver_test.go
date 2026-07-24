@@ -40,10 +40,10 @@ func TestServerWebserverDatabaseAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	webserver := New(client.NewWithBaseURL("token", server.URL)).Webserver
+	databaseBackup := New(client.NewWithBaseURL("token", server.URL)).Webserver.DatabaseBackup
 	ctx := context.Background()
 
-	status, err := webserver.DB.Status(ctx, DatabaseBackupStatusOptions{ServerSlug: "example-server"})
+	status, err := databaseBackup.Status(ctx, DatabaseBackupStatusOptions{ServerSlug: "example-server"})
 	if err != nil {
 		t.Fatalf("Status returned error: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestServerWebserverDatabaseAPI(t *testing.T) {
 	}
 
 	responses := make([]*WebserverAsyncActionResponse, 0, 4)
-	enable, err := webserver.DB.Enable(ctx, EnableDatabaseBackupOptions{
+	enable, err := databaseBackup.Enable(ctx, EnableDatabaseBackupOptions{
 		ServerSlug: "example-server",
 		DatabaseBackupConfiguration: DatabaseBackupConfiguration{
 			BackupDir: "/root/custom-backups",
@@ -65,7 +65,7 @@ func TestServerWebserverDatabaseAPI(t *testing.T) {
 	}
 	responses = append(responses, enable)
 
-	update, err := webserver.DB.Update(ctx, UpdateDatabaseBackupOptions{
+	update, err := databaseBackup.Update(ctx, UpdateDatabaseBackupOptions{
 		ServerSlug:                  "example-server",
 		DatabaseBackupConfiguration: DatabaseBackupConfiguration{Keep: 30},
 	})
@@ -74,13 +74,13 @@ func TestServerWebserverDatabaseAPI(t *testing.T) {
 	}
 	responses = append(responses, update)
 
-	disable, err := webserver.DB.Disable(ctx, DatabaseBackupActionOptions{ServerSlug: "example-server"})
+	disable, err := databaseBackup.Disable(ctx, DatabaseBackupActionOptions{ServerSlug: "example-server"})
 	if err != nil {
 		t.Fatalf("Disable returned error: %v", err)
 	}
 	responses = append(responses, disable)
 
-	run, err := webserver.DB.Run(ctx, DatabaseBackupActionOptions{ServerSlug: "example-server"})
+	run, err := databaseBackup.Run(ctx, DatabaseBackupActionOptions{ServerSlug: "example-server"})
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestServerWebserverDatabaseAPI(t *testing.T) {
 	}
 }
 
-func TestServerWebserverWordPressAPI(t *testing.T) {
+func TestServerWebserverFeatureAPIs(t *testing.T) {
 	var requests []recordedWebserverRequest
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requests = append(requests, recordWebserverRequest(t, r))
@@ -128,48 +128,48 @@ func TestServerWebserverWordPressAPI(t *testing.T) {
 	}))
 	defer server.Close()
 
-	wordpress := New(client.NewWithBaseURL("token", server.URL)).Webserver.WordPress
+	webserver := New(client.NewWithBaseURL("token", server.URL)).Webserver
 	ctx := context.Background()
 
 	responses := make([]*WebserverAsyncActionResponse, 0, 5)
-	block, err := wordpress.BlockSearchEngines(ctx, BlockSearchEnginesOptions{
+	block, err := webserver.SearchEngines.Block(ctx, SearchEnginesBlockOptions{
 		ServerSlug: "example-server",
 		RobotsTxt:  "User-agent: *\nDisallow: /staging",
 	})
 	if err != nil {
-		t.Fatalf("BlockSearchEngines returned error: %v", err)
+		t.Fatalf("SearchEngines.Block returned error: %v", err)
 	}
 	responses = append(responses, block)
 
-	unblock, err := wordpress.UnblockSearchEngines(ctx, UnblockSearchEnginesOptions{ServerSlug: "example-server"})
+	unblock, err := webserver.SearchEngines.Unblock(ctx, SearchEnginesUnblockOptions{ServerSlug: "example-server"})
 	if err != nil {
-		t.Fatalf("UnblockSearchEngines returned error: %v", err)
+		t.Fatalf("SearchEngines.Unblock returned error: %v", err)
 	}
 	responses = append(responses, unblock)
 
-	enableAuth, err := wordpress.EnableBasicAuth(ctx, EnableBasicAuthOptions{
+	enableAuth, err := webserver.BasicAuth.Enable(ctx, BasicAuthEnableOptions{
 		ServerSlug: "example-server",
 		Path:       "/admin",
 		Username:   "staging",
 		Password:   "secret",
 	})
 	if err != nil {
-		t.Fatalf("EnableBasicAuth returned error: %v", err)
+		t.Fatalf("BasicAuth.Enable returned error: %v", err)
 	}
 	responses = append(responses, enableAuth)
 
-	disableAuth, err := wordpress.DisableBasicAuth(ctx, DisableBasicAuthOptions{
+	disableAuth, err := webserver.BasicAuth.Disable(ctx, BasicAuthDisableOptions{
 		ServerSlug: "example-server",
 		Path:       "/admin",
 	})
 	if err != nil {
-		t.Fatalf("DisableBasicAuth returned error: %v", err)
+		t.Fatalf("BasicAuth.Disable returned error: %v", err)
 	}
 	responses = append(responses, disableAuth)
 
-	testCertbot, err := wordpress.TestCertbot(ctx, TestCertbotOptions{ServerSlug: "example-server"})
+	testCertbot, err := webserver.Certbot.Test(ctx, CertbotTestOptions{ServerSlug: "example-server"})
 	if err != nil {
-		t.Fatalf("TestCertbot returned error: %v", err)
+		t.Fatalf("Certbot.Test returned error: %v", err)
 	}
 	responses = append(responses, testCertbot)
 

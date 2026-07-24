@@ -56,28 +56,28 @@ type DatabaseBackupActionOptions struct {
 	ServerSlug string `json:"-" tfsdk:"server_slug"`
 }
 
-type BlockSearchEnginesOptions struct {
+type SearchEnginesBlockOptions struct {
 	ServerSlug string `json:"-" tfsdk:"server_slug"`
 	RobotsTxt  string `json:"robotsTxt,omitempty" tfsdk:"robots_txt"`
 }
 
-type UnblockSearchEnginesOptions struct {
+type SearchEnginesUnblockOptions struct {
 	ServerSlug string `json:"-" tfsdk:"server_slug"`
 }
 
-type EnableBasicAuthOptions struct {
+type BasicAuthEnableOptions struct {
 	ServerSlug string `json:"-" tfsdk:"server_slug"`
 	Path       string `json:"path" tfsdk:"path"`
 	Username   string `json:"username" tfsdk:"username"`
 	Password   string `json:"password" tfsdk:"password"`
 }
 
-type DisableBasicAuthOptions struct {
+type BasicAuthDisableOptions struct {
 	ServerSlug string `json:"-" tfsdk:"server_slug"`
 	Path       string `json:"path" tfsdk:"path"`
 }
 
-type TestCertbotOptions struct {
+type CertbotTestOptions struct {
 	ServerSlug string `json:"-" tfsdk:"server_slug"`
 }
 
@@ -87,26 +87,30 @@ type WebserverAsyncActionResponse struct {
 }
 
 type ServerWebserver struct {
-	DB        ServerWebserverDatabase
-	WordPress ServerWebserverWordPress
+	DatabaseBackup ServerWebserverDatabaseBackup
+	SearchEngines  ServerWebserverSearchEngines
+	BasicAuth      ServerWebserverBasicAuth
+	Certbot        ServerWebserverCertbot
 }
 
 func NewServerWebserver(c *client.Client) ServerWebserver {
 	return ServerWebserver{
-		DB:        NewServerWebserverDatabase(c),
-		WordPress: NewServerWebserverWordPress(c),
+		DatabaseBackup: NewServerWebserverDatabaseBackup(c),
+		SearchEngines:  NewServerWebserverSearchEngines(c),
+		BasicAuth:      NewServerWebserverBasicAuth(c),
+		Certbot:        NewServerWebserverCertbot(c),
 	}
 }
 
-type ServerWebserverDatabase struct {
+type ServerWebserverDatabaseBackup struct {
 	client *client.Client
 }
 
-func NewServerWebserverDatabase(c *client.Client) ServerWebserverDatabase {
-	return ServerWebserverDatabase{client: c}
+func NewServerWebserverDatabaseBackup(c *client.Client) ServerWebserverDatabaseBackup {
+	return ServerWebserverDatabaseBackup{client: c}
 }
 
-func (s *ServerWebserverDatabase) Status(ctx context.Context, opts DatabaseBackupStatusOptions) (*DatabaseBackupStatus, error) {
+func (s *ServerWebserverDatabaseBackup) Status(ctx context.Context, opts DatabaseBackupStatusOptions) (*DatabaseBackupStatus, error) {
 	var out DatabaseBackupStatus
 	_, err := s.client.Do(
 		ctx,
@@ -121,7 +125,7 @@ func (s *ServerWebserverDatabase) Status(ctx context.Context, opts DatabaseBacku
 	return &out, nil
 }
 
-func (s *ServerWebserverDatabase) Enable(ctx context.Context, opts EnableDatabaseBackupOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverDatabaseBackup) Enable(ctx context.Context, opts EnableDatabaseBackupOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -131,7 +135,7 @@ func (s *ServerWebserverDatabase) Enable(ctx context.Context, opts EnableDatabas
 	)
 }
 
-func (s *ServerWebserverDatabase) Update(ctx context.Context, opts UpdateDatabaseBackupOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverDatabaseBackup) Update(ctx context.Context, opts UpdateDatabaseBackupOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -141,7 +145,7 @@ func (s *ServerWebserverDatabase) Update(ctx context.Context, opts UpdateDatabas
 	)
 }
 
-func (s *ServerWebserverDatabase) Disable(ctx context.Context, opts DatabaseBackupActionOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverDatabaseBackup) Disable(ctx context.Context, opts DatabaseBackupActionOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -151,7 +155,7 @@ func (s *ServerWebserverDatabase) Disable(ctx context.Context, opts DatabaseBack
 	)
 }
 
-func (s *ServerWebserverDatabase) Run(ctx context.Context, opts DatabaseBackupActionOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverDatabaseBackup) Run(ctx context.Context, opts DatabaseBackupActionOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -161,15 +165,15 @@ func (s *ServerWebserverDatabase) Run(ctx context.Context, opts DatabaseBackupAc
 	)
 }
 
-type ServerWebserverWordPress struct {
+type ServerWebserverSearchEngines struct {
 	client *client.Client
 }
 
-func NewServerWebserverWordPress(c *client.Client) ServerWebserverWordPress {
-	return ServerWebserverWordPress{client: c}
+func NewServerWebserverSearchEngines(c *client.Client) ServerWebserverSearchEngines {
+	return ServerWebserverSearchEngines{client: c}
 }
 
-func (s *ServerWebserverWordPress) BlockSearchEngines(ctx context.Context, opts BlockSearchEnginesOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverSearchEngines) Block(ctx context.Context, opts SearchEnginesBlockOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -179,7 +183,7 @@ func (s *ServerWebserverWordPress) BlockSearchEngines(ctx context.Context, opts 
 	)
 }
 
-func (s *ServerWebserverWordPress) UnblockSearchEngines(ctx context.Context, opts UnblockSearchEnginesOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverSearchEngines) Unblock(ctx context.Context, opts SearchEnginesUnblockOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -189,7 +193,15 @@ func (s *ServerWebserverWordPress) UnblockSearchEngines(ctx context.Context, opt
 	)
 }
 
-func (s *ServerWebserverWordPress) EnableBasicAuth(ctx context.Context, opts EnableBasicAuthOptions) (*WebserverAsyncActionResponse, error) {
+type ServerWebserverBasicAuth struct {
+	client *client.Client
+}
+
+func NewServerWebserverBasicAuth(c *client.Client) ServerWebserverBasicAuth {
+	return ServerWebserverBasicAuth{client: c}
+}
+
+func (s *ServerWebserverBasicAuth) Enable(ctx context.Context, opts BasicAuthEnableOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -199,7 +211,7 @@ func (s *ServerWebserverWordPress) EnableBasicAuth(ctx context.Context, opts Ena
 	)
 }
 
-func (s *ServerWebserverWordPress) DisableBasicAuth(ctx context.Context, opts DisableBasicAuthOptions) (*WebserverAsyncActionResponse, error) {
+func (s *ServerWebserverBasicAuth) Disable(ctx context.Context, opts BasicAuthDisableOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,
@@ -209,7 +221,15 @@ func (s *ServerWebserverWordPress) DisableBasicAuth(ctx context.Context, opts Di
 	)
 }
 
-func (s *ServerWebserverWordPress) TestCertbot(ctx context.Context, opts TestCertbotOptions) (*WebserverAsyncActionResponse, error) {
+type ServerWebserverCertbot struct {
+	client *client.Client
+}
+
+func NewServerWebserverCertbot(c *client.Client) ServerWebserverCertbot {
+	return ServerWebserverCertbot{client: c}
+}
+
+func (s *ServerWebserverCertbot) Test(ctx context.Context, opts CertbotTestOptions) (*WebserverAsyncActionResponse, error) {
 	return doWebserverAsyncAction(
 		ctx,
 		s.client,

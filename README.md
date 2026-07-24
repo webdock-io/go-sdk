@@ -47,11 +47,11 @@ Server webserver operations are available under `client.Servers.Webserver`:
 ```go
 import "github.com/webdock-io/go-sdk/servers"
 
-status, err := client.Servers.Webserver.DB.Status(ctx, servers.DatabaseBackupStatusOptions{
+status, err := client.Servers.Webserver.DatabaseBackup.Status(ctx, servers.DatabaseBackupStatusOptions{
 	ServerSlug: "my-server",
 })
 
-_, err = client.Servers.Webserver.WordPress.EnableBasicAuth(ctx, servers.EnableBasicAuthOptions{
+_, err = client.Servers.Webserver.BasicAuth.Enable(ctx, servers.BasicAuthEnableOptions{
 	ServerSlug: "my-server",
 	Path:       "/staging",
 	Username:   "preview",
