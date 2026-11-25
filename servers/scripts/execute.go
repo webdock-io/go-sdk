@@ -10,6 +10,8 @@ import (
 type ExecuteScriptOptions struct {
 	ServerSlug string
 	ScriptId   int
+	// ScriptSlug takes precedence over ScriptId when set.
+	ScriptSlug string
 }
 
 type ExecuteScriptResponse struct {
@@ -17,7 +19,7 @@ type ExecuteScriptResponse struct {
 }
 
 func (s *ServerScripts) Execute(ctx context.Context, opts ExecuteScriptOptions) (*ExecuteScriptResponse, error) {
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/scripts/%d/execute", opts.ServerSlug, opts.ScriptId), nil, nil)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/scripts/%s/execute", opts.ServerSlug, scriptReference(opts.ScriptId, opts.ScriptSlug)), nil, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -3,8 +3,6 @@ package snapshots
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type DeleteSnapshotOptions struct {
@@ -13,14 +11,15 @@ type DeleteSnapshotOptions struct {
 }
 
 type DeleteSnapshotResponse struct {
-	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+	Snapshot   Snapshot `json:"snapshot" tfsdk:"snapshot"`
+	CallbackID string   `json:"callbackId" tfsdk:"callback_id"`
 }
 
 func (s *Snapshots) Delete(ctx context.Context, opts DeleteSnapshotOptions) (*DeleteSnapshotResponse, error) {
-	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/snapshots/%d", opts.ServerSlug, opts.SnapshotId), nil, nil)
+	var out Snapshot
+	callbackID, err := s.client.DoJSON(ctx, "DELETE", fmt.Sprintf("/servers/%s/snapshots/%d", opts.ServerSlug, opts.SnapshotId), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &DeleteSnapshotResponse{CallbackID: callbackID}, nil
+	return &DeleteSnapshotResponse{Snapshot: out, CallbackID: callbackID}, nil
 }

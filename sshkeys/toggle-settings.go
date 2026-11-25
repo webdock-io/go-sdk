@@ -13,6 +13,7 @@ type ToggleSSHSettingsResponse struct {
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Deprecated: use Servers.ToggleSSHSettings, which is where the Node SDK exposes it.
 func (s *SSHKeys) ToggleSSHSettings(ctx context.Context, opts SSHSettings) (*ToggleSSHSettingsResponse, error) {
 	body, err := json.Marshal(opts)
 	if err != nil {

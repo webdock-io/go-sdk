@@ -4,9 +4,16 @@ import (
 	"encoding/json"
 
 	"github.com/webdock-io/go-sdk/client"
+	"github.com/webdock-io/go-sdk/servers/archived"
+	"github.com/webdock-io/go-sdk/servers/cronjobs"
+	"github.com/webdock-io/go-sdk/servers/ftp"
+	"github.com/webdock-io/go-sdk/servers/mail"
+	servermonitoring "github.com/webdock-io/go-sdk/servers/monitoring"
+	"github.com/webdock-io/go-sdk/servers/mysql"
 	serverscripts "github.com/webdock-io/go-sdk/servers/scripts"
 	"github.com/webdock-io/go-sdk/servers/shellusers"
 	"github.com/webdock-io/go-sdk/servers/snapshots"
+	"github.com/webdock-io/go-sdk/servers/wordpress"
 )
 
 type ServerState string
@@ -136,23 +143,44 @@ func (s *Server) UnmarshalJSON(data []byte) error {
 
 type Servers struct {
 	client     *client.Client
-	IPBlocks   ServerIPBlocks
+	Scripts    serverscripts.ServerScripts
 	Identity   ServerIdentity
 	Settings   ServerSettings
+	IPBlocks   ServerIPBlocks
 	Webserver  ServerWebserver
-	Scripts    serverscripts.ServerScripts
+	Mail       mail.Mail
+	Monitoring servermonitoring.ServerMonitoring
+	WordPress  wordpress.WordPress
+	FTP        ftp.FTP
+	CronJobs   cronjobs.CronJobs
+	MySQL      mysql.MySQL
+	Archived   archived.Archived
+
+	// ShellUsers is the same API as Webdock.ShellUsers.
+	//
+	// Deprecated: use Webdock.ShellUsers, which is where the Node SDK exposes it.
 	ShellUsers shellusers.ShellUsers
-	Snapshots  snapshots.Snapshots
+	// Snapshots is the same API as Webdock.Snapshots.
+	//
+	// Deprecated: use Webdock.Snapshots, which is where the Node SDK exposes it.
+	Snapshots snapshots.Snapshots
 }
 
 func New(c *client.Client) Servers {
 	return Servers{
 		client:     c,
-		IPBlocks:   NewServerIPBlocks(c),
+		Scripts:    serverscripts.New(c),
 		Identity:   NewServerIdentity(c),
 		Settings:   NewServerSettings(c),
+		IPBlocks:   NewServerIPBlocks(c),
 		Webserver:  NewServerWebserver(c),
-		Scripts:    serverscripts.New(c),
+		Mail:       mail.New(c),
+		Monitoring: servermonitoring.New(c),
+		WordPress:  wordpress.New(c),
+		FTP:        ftp.New(c),
+		CronJobs:   cronjobs.New(c),
+		MySQL:      mysql.New(c),
+		Archived:   archived.New(c),
 		ShellUsers: shellusers.New(c),
 		Snapshots:  snapshots.New(c),
 	}

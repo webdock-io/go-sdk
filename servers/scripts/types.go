@@ -1,6 +1,10 @@
 package serverscripts
 
-import "github.com/webdock-io/go-sdk/client"
+import (
+	"strconv"
+
+	"github.com/webdock-io/go-sdk/client"
+)
 
 type Script struct {
 	ID                int64   `json:"id" tfsdk:"id"`
@@ -22,6 +26,7 @@ type ServerScriptDTO struct {
 	LastRun           *string `json:"lastRun" tfsdk:"last_run"`
 	LastRunCallbackId *string `json:"lastRunCallbackId" tfsdk:"last_run_callback_id"`
 	Created           string  `json:"created" tfsdk:"created"`
+	Slug              string  `json:"slug" tfsdk:"slug"`
 }
 
 type ServerScripts struct {
@@ -30,4 +35,11 @@ type ServerScripts struct {
 
 func New(c *client.Client) ServerScripts {
 	return ServerScripts{client: c}
+}
+
+func scriptReference(id int, slug string) string {
+	if slug != "" {
+		return slug
+	}
+	return strconv.Itoa(id)
 }

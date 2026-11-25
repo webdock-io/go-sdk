@@ -14,8 +14,8 @@ type CreateScriptOptions struct {
 	ScriptId             int    `json:"-"`
 	ScriptSlug           string `json:"-"`
 	Path                 string `json:"path"`
-	MakeScriptExecutable bool   `json:"makeScriptExecutable,omitempty"`
-	ExecuteImmediately   bool   `json:"executeImmediately,omitempty"`
+	MakeScriptExecutable bool   `json:"makeScriptExecutable"`
+	ExecuteImmediately   bool   `json:"executeImmediately"`
 }
 
 type CreateScriptResponse struct {
@@ -23,13 +23,14 @@ type CreateScriptResponse struct {
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Create mirrors servers.scripts.create() in the Node SDK.
 func (s *ServerScripts) Create(ctx context.Context, opts CreateScriptOptions) (*CreateScriptResponse, error) {
 	data, err := json.Marshal(createScriptPayload(opts))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out Script
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/scripts", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/scripts", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}
@@ -38,19 +39,16 @@ func (s *ServerScripts) Create(ctx context.Context, opts CreateScriptOptions) (*
 }
 
 func createScriptPayload(opts CreateScriptOptions) map[string]any {
+	// The Node SDK always sends both flags, so false is sent explicitly too.
 	payload := map[string]any{
-		"path": opts.Path,
+		"path":                 opts.Path,
+		"makeScriptExecutable": opts.MakeScriptExecutable,
+		"executeImmediately":   opts.ExecuteImmediately,
 	}
 	if opts.ScriptSlug != "" {
 		payload["scriptId"] = opts.ScriptSlug
 	} else {
 		payload["scriptId"] = opts.ScriptId
-	}
-	if opts.MakeScriptExecutable {
-		payload["makeScriptExecutable"] = opts.MakeScriptExecutable
-	}
-	if opts.ExecuteImmediately {
-		payload["executeImmediately"] = opts.ExecuteImmediately
 	}
 	return payload
 }

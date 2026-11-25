@@ -21,9 +21,14 @@ func (s *Servers) Update(ctx context.Context, opts UpdateServerOptions) (*Server
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 	var out Server
-	_, err = s.client.Do(ctx, "PATCH", fmt.Sprintf("v1/servers/%s", opts.ServerSlug), bytes.NewBuffer(data), &out)
+	_, err = s.client.Do(ctx, "PATCH", fmt.Sprintf("/servers/%s", opts.ServerSlug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}
 	return &out, nil
+}
+
+// UpdateServerMetadata mirrors servers.UpdateServerMetadata() in the Node SDK.
+func (s *Servers) UpdateServerMetadata(ctx context.Context, opts UpdateServerOptions) (*Server, error) {
+	return s.Update(ctx, opts)
 }

@@ -18,10 +18,12 @@ func NewServerSettings(c *client.Client) ServerSettings {
 }
 
 type UpdateSettingsOptions struct {
-	ServerSlug        string `json:"-" tfsdk:"server_slug"`
-	Webroot           string `json:"webroot" tfsdk:"webroot"`
-	UpdateWebserver   bool   `json:"updateWebserver" tfsdk:"update_webserver"`
-	UpdateLetsencrypt bool   `json:"updateLetsencrypt" tfsdk:"update_letsencrypt"`
+	ServerSlug string `json:"-" tfsdk:"server_slug"`
+	// Zero values are not sent, matching the Node SDK which only sends the
+	// fields you set.
+	Webroot           string `json:"webroot,omitempty" tfsdk:"webroot"`
+	UpdateWebserver   bool   `json:"updateWebserver,omitempty" tfsdk:"update_webserver"`
+	UpdateLetsencrypt bool   `json:"updateLetsencrypt,omitempty" tfsdk:"update_letsencrypt"`
 }
 
 type UpdateSettingsResponse struct {

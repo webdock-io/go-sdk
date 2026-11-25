@@ -20,12 +20,14 @@ type RestoreFromSnapshotResponse struct {
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Deprecated: use Snapshots.Restore, which is where the Node SDK exposes it.
+// This now calls the same endpoint.
 func (s *Servers) RestoreFromSnapshot(ctx context.Context, opts RestoreFromSnapshotOptions) (*RestoreFromSnapshotResponse, error) {
 	data, err := json.Marshal(restoreFromSnapshotPayload(opts))
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/restore", opts.ServerSlug), bytes.NewBuffer(data), nil)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/snapshots/restore", opts.ServerSlug), bytes.NewBuffer(data), nil)
 	if err != nil {
 		return nil, err
 	}

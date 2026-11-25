@@ -3,10 +3,11 @@ package sshkeys
 import "github.com/webdock-io/go-sdk/client"
 
 type SSHKey struct {
-	ID      int64  `json:"id" tfsdk:"id"`
-	Name    string `json:"name" tfsdk:"name"`
-	Key     string `json:"key" tfsdk:"key"`
-	Created string `json:"created" tfsdk:"created"`
+	Fingerprint string `json:"fingerprint" tfsdk:"fingerprint"`
+	ID          int64  `json:"id" tfsdk:"id"`
+	Name        string `json:"name" tfsdk:"name"`
+	Key         string `json:"key" tfsdk:"key"`
+	Created     string `json:"created" tfsdk:"created"`
 }
 
 type SSHSettings struct {

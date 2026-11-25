@@ -1,23 +1,18 @@
 package account
 
-import "context"
+import (
+	"context"
 
-type ArchivedServer struct {
-	ID             int64  `json:"id" tfsdk:"id"`
-	Name           string `json:"name" tfsdk:"name"`
-	Type           string `json:"type" tfsdk:"type"`
-	Virtualization string `json:"virtualization" tfsdk:"virtualization"`
-	Completed      bool   `json:"completed" tfsdk:"completed"`
-	Date           string `json:"date" tfsdk:"date"`
-	CallbackID     string `json:"callbackId" tfsdk:"callback_id"`
-	Deletable      bool   `json:"deletable" tfsdk:"deletable"`
-	ServerSlug     string `json:"serverSlug" tfsdk:"server_slug"`
-}
+	"github.com/webdock-io/go-sdk/servers/archived"
+)
 
+// ArchivedServer is an archived server (also returned by Servers.Archived).
+type ArchivedServer = archived.ArchivedServer
+
+// ListArchivedServers mirrors account.listArchivedServers() in the Node SDK.
 func (a *Account) ListArchivedServers(ctx context.Context) ([]ArchivedServer, error) {
 	var out []ArchivedServer
-	_, err := a.client.Do(ctx, "GET", "/servers/snapshots", nil, &out)
-	if err != nil {
+	if _, err := a.client.DoJSON(ctx, "GET", "/servers/archived", nil, &out); err != nil {
 		return nil, err
 	}
 	return out, nil

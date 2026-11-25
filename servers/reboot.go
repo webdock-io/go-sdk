@@ -3,8 +3,6 @@ package servers
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type RebootServerOptions struct {
@@ -12,14 +10,16 @@ type RebootServerOptions struct {
 }
 
 type RebootServerResponse struct {
+	Server     Server `json:"server" tfsdk:"server"`
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Reboot mirrors servers.reboot() in the Node SDK.
 func (s *Servers) Reboot(ctx context.Context, opts RebootServerOptions) (*RebootServerResponse, error) {
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/reboot", opts.Slug), nil, nil)
+	var out Server
+	callbackID, err := s.client.DoJSON(ctx, "POST", fmt.Sprintf("/servers/%s/actions/reboot", opts.Slug), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &RebootServerResponse{CallbackID: callbackID}, nil
+	return &RebootServerResponse{Server: out, CallbackID: callbackID}, nil
 }

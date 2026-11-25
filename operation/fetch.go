@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Fetch mirrors operation.fetch() in the Node SDK.
 func (o *Operation) Fetch(ctx context.Context, callbackID string) ([]EventLog, error) {
 	u := &url.URL{Path: "/events"}
 	q := url.Values{}
@@ -21,10 +22,16 @@ func (o *Operation) Fetch(ctx context.Context, callbackID string) ([]EventLog, e
 	return out, nil
 }
 
+// pollInterval matches the one-second delay used by the Node SDK.
+var pollInterval = time.Second
+
 type WaitForEventResult struct {
 	Data string `json:"data" tfsdk:"data"`
 }
 
+// WaitForEventToEnd polls the event log until every event for callbackID has
+// finished, returning the finished message (for FetchFile, the base64 file
+// content). Mirrors operation.waitForEventToEnd() in the Node SDK.
 func (o *Operation) WaitForEventToEnd(ctx context.Context, callbackID string) (*WaitForEventResult, error) {
 	if ctx == nil {
 		ctx = context.Background()
@@ -36,7 +43,7 @@ func (o *Operation) WaitForEventToEnd(ctx context.Context, callbackID string) (*
 			return nil, err
 		}
 		if len(logs) == 0 {
-			if err := waitForNextPoll(ctx, 3*time.Second); err != nil {
+			if err := waitForNextPoll(ctx, pollInterval); err != nil {
 				return nil, err
 			}
 			continue
@@ -50,7 +57,7 @@ func (o *Operation) WaitForEventToEnd(ctx context.Context, callbackID string) (*
 			return result, nil
 		}
 
-		if err := waitForNextPoll(ctx, 3*time.Second); err != nil {
+		if err := waitForNextPoll(ctx, pollInterval); err != nil {
 			return nil, err
 		}
 	}

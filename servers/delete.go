@@ -3,8 +3,6 @@ package servers
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type DeleteServerOptions struct {
@@ -12,14 +10,16 @@ type DeleteServerOptions struct {
 }
 
 type DeleteServerResponse struct {
+	Server     Server `json:"server" tfsdk:"server"`
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Delete deletes a server. Mirrors servers.delete() in the Node SDK.
 func (s *Servers) Delete(ctx context.Context, opts DeleteServerOptions) (*DeleteServerResponse, error) {
-	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s", opts.Slug), nil, nil)
+	var out Server
+	callbackID, err := s.client.DoJSON(ctx, "DELETE", fmt.Sprintf("/servers/%s", opts.Slug), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &DeleteServerResponse{CallbackID: callbackID}, nil
+	return &DeleteServerResponse{Server: out, CallbackID: callbackID}, nil
 }

@@ -6,21 +6,23 @@ import (
 )
 
 type ListPlatformsOptions struct {
+	// Currency is EUR, USD or DKK. When empty no currency is sent and the API
+	// picks its default, matching the Node SDK.
 	Currency string
 }
 
+// List mirrors platforms.list() in the Node SDK.
 func (p *Platforms) List(ctx context.Context, opts ...ListPlatformsOptions) ([]Platform, error) {
-	options := ListPlatformsOptions{Currency: "EUR"}
+	var options ListPlatformsOptions
 	if len(opts) > 0 {
 		options = opts[0]
-		if options.Currency == "" {
-			options.Currency = "EUR"
-		}
 	}
 
 	u := &url.URL{Path: "/platforms"}
 	q := url.Values{}
-	q.Set("currency", options.Currency)
+	if options.Currency != "" {
+		q.Set("currency", options.Currency)
+	}
 	u.RawQuery = q.Encode()
 
 	var out []Platform

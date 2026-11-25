@@ -3,8 +3,6 @@ package servers
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type StopServerOptions struct {
@@ -12,14 +10,16 @@ type StopServerOptions struct {
 }
 
 type StopServerResponse struct {
+	Server     Server `json:"server" tfsdk:"server"`
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Stop mirrors servers.stop() in the Node SDK.
 func (s *Servers) Stop(ctx context.Context, opts StopServerOptions) (*StopServerResponse, error) {
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/stop", opts.Slug), nil, nil)
+	var out Server
+	callbackID, err := s.client.DoJSON(ctx, "POST", fmt.Sprintf("/servers/%s/actions/stop", opts.Slug), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &StopServerResponse{CallbackID: callbackID}, nil
+	return &StopServerResponse{Server: out, CallbackID: callbackID}, nil
 }

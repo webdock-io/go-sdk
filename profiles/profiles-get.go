@@ -7,16 +7,21 @@ import (
 )
 
 type ListProfilesOptions struct {
+	// LocationID defaults to "dk", matching the Node SDK.
 	LocationID  string
 	ProfileSlug string
 }
 
+// List mirrors profiles.list() in the Node SDK. A single-profile response
+// (when ProfileSlug matches exactly) is still returned as a slice.
 func (s *Profiles) List(ctx context.Context, opts ListProfilesOptions) ([]Profile, error) {
 	u := &url.URL{Path: "/profiles"}
 	q := url.Values{}
-	if opts.LocationID != "" {
-		q.Set("locationId", opts.LocationID)
+	locationID := opts.LocationID
+	if locationID == "" {
+		locationID = "dk"
 	}
+	q.Set("locationId", locationID)
 	if opts.ProfileSlug != "" {
 		q.Set("profileSlug", opts.ProfileSlug)
 	}

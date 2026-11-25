@@ -47,6 +47,8 @@ type MetricsOptions struct {
 	Now        bool
 }
 
+// Deprecated: use GetServerMetrics or GetInstantMetrics, which return the
+// full metrics shape.
 func (s *Servers) Metrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
 	endpoint := fmt.Sprintf("/servers/%s/metrics", opts.ServerSlug)
 	if opts.Now {

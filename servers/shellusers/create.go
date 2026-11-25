@@ -10,11 +10,12 @@ import (
 )
 
 type CreateShellUserOptions struct {
-	ServerSlug string  `json:"-"`
-	Username   string  `json:"username"`
-	Password   string  `json:"password"`
-	Group      string  `json:"group"`
-	Shell      string  `json:"shell"`
+	ServerSlug string `json:"-"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	// Group and Shell are optional; the API applies its defaults when empty.
+	Group      string  `json:"group,omitempty"`
+	Shell      string  `json:"shell,omitempty"`
 	PublicKeys []int64 `json:"publicKeys"`
 }
 
@@ -23,12 +24,10 @@ type CreatedShellUser struct {
 	CallbackID string    `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Create mirrors shellUsers.create() in the Node SDK.
 func (s *ShellUsers) Create(ctx context.Context, opts CreateShellUserOptions) (*CreatedShellUser, error) {
-	if opts.Group == "" {
-		opts.Group = "sudo"
-	}
-	if opts.Shell == "" {
-		opts.Shell = "/bin/bash"
+	if opts.PublicKeys == nil {
+		opts.PublicKeys = []int64{}
 	}
 	data, err := json.Marshal(opts)
 	if err != nil {

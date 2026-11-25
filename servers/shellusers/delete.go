@@ -3,8 +3,6 @@ package shellusers
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type DeleteShellUserOptions struct {
@@ -13,14 +11,15 @@ type DeleteShellUserOptions struct {
 }
 
 type DeleteShellUserResponse struct {
-	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+	ShellUser  ShellUser `json:"shell_user" tfsdk:"shell_user"`
+	CallbackID string    `json:"callbackId" tfsdk:"callback_id"`
 }
 
 func (s *ShellUsers) Delete(ctx context.Context, opts DeleteShellUserOptions) (*DeleteShellUserResponse, error) {
-	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), nil, nil)
+	var out ShellUser
+	callbackID, err := s.client.DoJSON(ctx, "DELETE", fmt.Sprintf("/servers/%s/shellUsers/%d", opts.ServerSlug, opts.ShellUserId), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &DeleteShellUserResponse{CallbackID: callbackID}, nil
+	return &DeleteShellUserResponse{ShellUser: out, CallbackID: callbackID}, nil
 }

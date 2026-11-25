@@ -24,7 +24,7 @@ const (
 const (
 	DefaultBaseURL = "https://api.webdock.io"
 	APIBasePath    = "/v1"
-	APIVersion     = "1.1.1"
+	APIVersion     = "1.1.6"
 	SDKClient      = "go-sdk"
 	SDKIdentifier  = SDKClient + "/" + APIVersion
 )
@@ -116,6 +116,17 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 		return nil, fmt.Errorf("invalid path: %w", err)
 	}
 
+	// Keep percent-encoded segments (for example IDs escaped with
+	// url.PathEscape) intact instead of decoding them back into the path.
+	// This must be read before parsed.Path is modified below.
+	rawPath := parsed.EscapedPath()
+	if !strings.HasPrefix(rawPath, "/") {
+		rawPath = "/" + rawPath
+	}
+	if rawPath != APIBasePath && !strings.HasPrefix(rawPath, APIBasePath+"/") {
+		rawPath = APIBasePath + rawPath
+	}
+
 	if parsed.Path == "" {
 		parsed.Path = "/"
 	}
@@ -132,6 +143,7 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 	}
 	apiURL := baseURL.ResolveReference(&url.URL{
 		Path:     parsed.Path,
+		RawPath:  rawPath,
 		RawQuery: parsed.RawQuery,
 	})
 
@@ -178,8 +190,11 @@ func (c *Client) Do(ctx context.Context, method string, path string, payload io.
 		}
 	}
 
-	c.res = res
-	return c, nil
+	// Return a copy that carries this response so concurrent requests on the
+	// same client never read each other's headers.
+	responseClient := *c
+	responseClient.res = res
+	return &responseClient, nil
 }
 
 func applicationName() string {

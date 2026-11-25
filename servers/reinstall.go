@@ -18,6 +18,7 @@ type ReinstallServerOptions struct {
 }
 
 type ReinstallServerResponse struct {
+	Server     Server `json:"server" tfsdk:"server"`
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
@@ -26,12 +27,13 @@ func (s *Servers) Reinstall(ctx context.Context, opts ReinstallServerOptions) (*
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/reinstall", opts.Slug), bytes.NewBuffer(data), nil)
+	var out Server
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/actions/reinstall", opts.Slug), bytes.NewBuffer(data), &out)
 	if err != nil {
 		return nil, err
 	}
 	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &ReinstallServerResponse{CallbackID: callbackID}, nil
+	return &ReinstallServerResponse{Server: out, CallbackID: callbackID}, nil
 }
 
 func reinstallServerPayload(opts ReinstallServerOptions) map[string]any {

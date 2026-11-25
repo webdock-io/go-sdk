@@ -1,9 +1,7 @@
 package servers
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -49,35 +47,85 @@ func (s *ServerIPBlocks) List(ctx context.Context, opts ListIPBlocksOptions) (ma
 	return out, nil
 }
 
+// ListIPBlocks mirrors servers.IpBlock.ListIpBlocks() in the Node SDK.
 func (s *ServerIPBlocks) ListIPBlocks(ctx context.Context, opts ListIPBlocksOptions) (map[int64]IPBlockStats, error) {
 	return s.List(ctx, opts)
 }
 
+// ServerIP is one IP address assigned to a server.
+type ServerIP struct {
+	// ID is the IP row ID, as used by ChangeIPAddress and Webdock.IPBlocks.InspectIPBlock.
+	ID int64 `json:"id" tfsdk:"id"`
+	// BlockID is the IP block this address belongs to (see ListIPBlocks).
+	BlockID int64 `json:"blockId" tfsdk:"block_id"`
+	// IPv4 is nil for IPv6-only assignments.
+	IPv4 *string `json:"ipv4" tfsdk:"ipv4"`
+	// IPv6 is nil when the block has no IPv6.
+	IPv6 *string `json:"ipv6" tfsdk:"ipv6"`
+	// Primary is true for the server's primary (outbound) IP. Exactly one IP per server is primary.
+	Primary bool `json:"primary" tfsdk:"primary"`
+	// Billable is true when this IP is billed in addition to the server price.
+	Billable bool `json:"billable" tfsdk:"billable"`
+	// ReverseDNS is the custom PTR hostname, or nil for the default.
+	ReverseDNS *string `json:"reverseDns" tfsdk:"reverse_dns"`
+}
+
+type ListIPsOptions struct {
+	ServerSlug string
+}
+
+// ListIPs lists the IPs assigned to a server. Mirrors servers.IpBlock.listIps() in the Node SDK.
+func (s *ServerIPBlocks) ListIPs(ctx context.Context, opts ListIPsOptions) ([]ServerIP, error) {
+	var out []ServerIP
+	if _, err := s.client.DoJSON(ctx, "GET", fmt.Sprintf("/servers/%s/ips", opts.ServerSlug), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ServerIPToAdd describes an IP to attach to a server. Set exactly one of
+// IPID (a specific free IP) or BlockID (any free IP from that block).
+type ServerIPToAdd struct {
+	IPID    *int64 `json:"ipId,omitempty" tfsdk:"ip_id"`
+	BlockID *int64 `json:"blockId,omitempty" tfsdk:"block_id"`
+	Primary *bool  `json:"primary,omitempty" tfsdk:"primary"`
+	// ReverseDNS sets the PTR hostname; client.Null[string]() keeps the default.
+	ReverseDNS client.Nullable[string] `json:"reverseDns,omitzero" tfsdk:"-"`
+}
+
+// ReverseDNSUpdate sets the PTR hostname of an IP. A nil Hostname resets it
+// to the default.
+type ReverseDNSUpdate struct {
+	IPID     int64   `json:"ipId" tfsdk:"ip_id"`
+	Hostname *string `json:"hostname" tfsdk:"hostname"`
+}
+
 type ChangeIPAddressOptions struct {
-	ServerSlug           string `json:"-" tfsdk:"server_slug"`
-	SameBlock            bool   `json:"sameBlock" tfsdk:"same_block"`
-	OverrideBlockID      int64  `json:"overrideBlockId" tfsdk:"override_block_id"`
-	MarkReleasedIPBanned bool   `json:"markReleasedIpBanned" tfsdk:"mark_released_ip_banned"`
+	ServerSlug      string                 `json:"-" tfsdk:"server_slug"`
+	Add             []ServerIPToAdd        `json:"add,omitzero" tfsdk:"add"`
+	Remove          []int64                `json:"remove,omitzero" tfsdk:"remove"`
+	BanRemovedIPIDs []int64                `json:"banRemovedIpIds,omitzero" tfsdk:"ban_removed_ip_ids"`
+	PrimaryIPID     client.Nullable[int64] `json:"primaryIpId,omitzero" tfsdk:"-"`
+	ReverseDNS      []ReverseDNSUpdate     `json:"reverseDns,omitzero" tfsdk:"reverse_dns"`
 }
 
 type ChangeIPAddressResponse struct {
-	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
+	IPs        []ServerIP `json:"ips" tfsdk:"ips"`
+	CallbackID string     `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// ChangeIPAddress adds, removes, re-prioritises and sets reverse DNS for a
+// server's IPs. Mirrors servers.IpBlock.ChangeIPAddress() in the Node SDK.
 func (s *ServerIPBlocks) ChangeIPAddress(ctx context.Context, opts ChangeIPAddressOptions) (*ChangeIPAddressResponse, error) {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return nil, fmt.Errorf("marshaling request: %w", err)
-	}
-
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/actions/changeIp", opts.ServerSlug), bytes.NewBuffer(body), nil)
+	var out []ServerIP
+	callbackID, err := s.client.DoJSON(ctx, "PATCH", fmt.Sprintf("/servers/%s/ips", opts.ServerSlug), opts, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &ChangeIPAddressResponse{CallbackID: callbackID}, nil
+	return &ChangeIPAddressResponse{IPs: out, CallbackID: callbackID}, nil
 }
 
+// Deprecated: use ChangeIPAddress.
 func (s *ServerIPBlocks) ChangeIP(ctx context.Context, opts ChangeIPAddressOptions) (*ChangeIPAddressResponse, error) {
 	return s.ChangeIPAddress(ctx, opts)
 }

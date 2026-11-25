@@ -10,37 +10,43 @@ import (
 )
 
 type CreateServerFromImageOptions struct {
-	Name           string `json:"name"`
-	LocationId     string `json:"locationId"`
-	ProfileSlug    string `json:"profileSlug,omitempty"`
-	ImageSlug      string `json:"imageSlug,omitempty"`
-	Virtualization string `json:"virtualization,omitempty"`
+	Name        string `json:"name"`
+	LocationId  string `json:"locationId"`
+	ProfileSlug string `json:"profileSlug,omitempty"`
+	ImageSlug   string `json:"imageSlug,omitempty"`
+	// Deprecated: the API no longer accepts this field and it is not sent.
+	Virtualization string `json:"-"`
 	UserScriptID   int64  `json:"userScriptId,omitempty"`
 	UserScriptSlug string `json:"-"`
-	Slug           string `json:"slug,omitempty"`
+	// Deprecated: the API no longer accepts this field and it is not sent.
+	Slug string `json:"-"`
 }
 
 type CreateServerFromSnapshotOptions struct {
-	Name           string `json:"name"`
-	LocationId     string `json:"locationId"`
-	ProfileSlug    string `json:"profileSlug,omitempty"`
-	SnapshotId     int    `json:"snapshotId"`
-	Virtualization string `json:"virtualization,omitempty"`
+	Name        string `json:"name"`
+	LocationId  string `json:"locationId"`
+	ProfileSlug string `json:"profileSlug,omitempty"`
+	SnapshotId  int    `json:"snapshotId"`
+	// Deprecated: the API no longer accepts this field and it is not sent.
+	Virtualization string `json:"-"`
 	UserScriptID   int64  `json:"userScriptId,omitempty"`
 	UserScriptSlug string `json:"-"`
-	Slug           string `json:"slug,omitempty"`
+	// Deprecated: the API no longer accepts this field and it is not sent.
+	Slug string `json:"-"`
 }
 
 type CreateServerOptions struct {
-	Name           string `json:"name"`
-	LocationId     string `json:"locationId"`
-	ProfileSlug    string `json:"profileSlug,omitempty"`
-	ImageSlug      string `json:"imageSlug,omitempty"`
-	SnapshotId     *int   `json:"snapshotId,omitempty"`
-	Virtualization string `json:"virtualization,omitempty"`
+	Name        string `json:"name"`
+	LocationId  string `json:"locationId"`
+	ProfileSlug string `json:"profileSlug,omitempty"`
+	ImageSlug   string `json:"imageSlug,omitempty"`
+	SnapshotId  *int   `json:"snapshotId,omitempty"`
+	// Deprecated: the API no longer accepts this field and it is not sent.
+	Virtualization string `json:"-"`
 	UserScriptID   int64  `json:"userScriptId,omitempty"`
 	UserScriptSlug string `json:"-"`
-	Slug           string `json:"slug,omitempty"`
+	// Deprecated: the API no longer accepts this field and it is not sent.
+	Slug string `json:"-"`
 }
 
 type CreatedServer struct {
@@ -48,6 +54,8 @@ type CreatedServer struct {
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Create mirrors servers.create() in the Node SDK. Set either ImageSlug or
+// SnapshotId. UserScriptSlug takes precedence over UserScriptID.
 func (s *Servers) Create(ctx context.Context, opts CreateServerOptions) (*CreatedServer, error) {
 	data, err := json.Marshal(createServerPayload(opts))
 	if err != nil {
@@ -76,16 +84,10 @@ func createServerPayload(opts CreateServerOptions) map[string]any {
 	if opts.SnapshotId != nil {
 		payload["snapshotId"] = *opts.SnapshotId
 	}
-	if opts.Virtualization != "" {
-		payload["virtualization"] = opts.Virtualization
-	}
 	if opts.UserScriptSlug != "" {
 		payload["userScriptId"] = opts.UserScriptSlug
 	} else if opts.UserScriptID != 0 {
 		payload["userScriptId"] = opts.UserScriptID
-	}
-	if opts.Slug != "" {
-		payload["slug"] = opts.Slug
 	}
 	return payload
 }

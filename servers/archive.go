@@ -3,8 +3,6 @@ package servers
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type ArchiveServerOptions struct {
@@ -12,14 +10,16 @@ type ArchiveServerOptions struct {
 }
 
 type ArchiveServerResponse struct {
+	Server     Server `json:"server" tfsdk:"server"`
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Archive archives a server. Mirrors servers.archive() in the Node SDK.
 func (s *Servers) Archive(ctx context.Context, opts ArchiveServerOptions) (*ArchiveServerResponse, error) {
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/suspend", opts.Slug), nil, nil)
+	var out Server
+	callbackID, err := s.client.DoJSON(ctx, "POST", fmt.Sprintf("/servers/%s/actions/archive", opts.Slug), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &ArchiveServerResponse{CallbackID: callbackID}, nil
+	return &ArchiveServerResponse{Server: out, CallbackID: callbackID}, nil
 }

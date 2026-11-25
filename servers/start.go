@@ -3,8 +3,6 @@ package servers
 import (
 	"context"
 	"fmt"
-
-	"github.com/webdock-io/go-sdk/client"
 )
 
 type StartServerOptions struct {
@@ -12,14 +10,16 @@ type StartServerOptions struct {
 }
 
 type StartServerResponse struct {
+	Server     Server `json:"server" tfsdk:"server"`
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Start mirrors servers.start() in the Node SDK.
 func (s *Servers) Start(ctx context.Context, opts StartServerOptions) (*StartServerResponse, error) {
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("v1/servers/%s/actions/start", opts.Slug), nil, nil)
+	var out Server
+	callbackID, err := s.client.DoJSON(ctx, "POST", fmt.Sprintf("/servers/%s/actions/start", opts.Slug), nil, &out)
 	if err != nil {
 		return nil, err
 	}
-	callbackID, _ := c.GetHeader(client.CallbackID)
-	return &StartServerResponse{CallbackID: callbackID}, nil
+	return &StartServerResponse{Server: out, CallbackID: callbackID}, nil
 }

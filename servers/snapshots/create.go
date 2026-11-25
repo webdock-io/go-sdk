@@ -19,6 +19,7 @@ type TakeSnapshotResponse struct {
 	CallbackID string   `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Deprecated: use Servers.Snapshot or Snapshots.Create.
 func (s *Snapshots) Take(ctx context.Context, opts TakeSnapshotOptions) (*TakeSnapshotResponse, error) {
 	data, err := json.Marshal(map[string]string{"name": opts.Name})
 	if err != nil {
@@ -33,6 +34,7 @@ func (s *Snapshots) Take(ctx context.Context, opts TakeSnapshotOptions) (*TakeSn
 	return &TakeSnapshotResponse{Snapshot: out, CallbackID: callbackID}, nil
 }
 
+// Create mirrors snapshots.create() in the Node SDK.
 func (s *Snapshots) Create(ctx context.Context, opts TakeSnapshotOptions) (*TakeSnapshotResponse, error) {
 	data, err := json.Marshal(map[string]string{"name": opts.Name})
 	if err != nil {

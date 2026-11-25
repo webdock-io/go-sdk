@@ -10,6 +10,8 @@ import (
 type DeleteScriptOptions struct {
 	ServerSlug string
 	ScriptId   int
+	// ScriptSlug takes precedence over ScriptId when set.
+	ScriptSlug string
 }
 
 type DeleteScriptResponse struct {
@@ -17,7 +19,7 @@ type DeleteScriptResponse struct {
 }
 
 func (s *ServerScripts) Delete(ctx context.Context, opts DeleteScriptOptions) (*DeleteScriptResponse, error) {
-	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("v1/servers/%s/scripts/%d", opts.ServerSlug, opts.ScriptId), nil, nil)
+	c, err := s.client.Do(ctx, "DELETE", fmt.Sprintf("/servers/%s/scripts/%s", opts.ServerSlug, scriptReference(opts.ScriptId, opts.ScriptSlug)), nil, nil)
 	if err != nil {
 		return nil, err
 	}

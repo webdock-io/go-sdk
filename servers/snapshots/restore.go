@@ -18,13 +18,14 @@ type RestoreSnapshotResponse struct {
 	CallbackID string `json:"callbackId" tfsdk:"callback_id"`
 }
 
+// Restore mirrors snapshots.restore() in the Node SDK.
 func (s *Snapshots) Restore(ctx context.Context, opts RestoreSnapshotOptions) (*RestoreSnapshotResponse, error) {
 	body, err := json.Marshal(map[string]int64{"snapshotId": opts.SnapshotID})
 	if err != nil {
 		return nil, fmt.Errorf("marshaling request: %w", err)
 	}
 
-	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/actions/restore", opts.ServerSlug), bytes.NewBuffer(body), nil)
+	c, err := s.client.Do(ctx, "POST", fmt.Sprintf("/servers/%s/snapshots/restore", opts.ServerSlug), bytes.NewBuffer(body), nil)
 	if err != nil {
 		return nil, err
 	}

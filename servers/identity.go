@@ -46,9 +46,9 @@ func (s *ServerIdentity) Update(ctx context.Context, opts UpdateIdentityOptions)
 
 type RenewCertificatesOptions struct {
 	ServerSlug string   `json:"-" tfsdk:"server_slug"`
-	Domains    []string `json:"domains" tfsdk:"domains"`
-	Email      string   `json:"email" tfsdk:"email"`
-	ForceSSL   bool     `json:"forceSSL" tfsdk:"force_ssl"`
+	Domains    []string `json:"domains,omitzero" tfsdk:"domains"`
+	Email      string   `json:"email,omitempty" tfsdk:"email"`
+	ForceSSL   bool     `json:"forceSSL,omitempty" tfsdk:"force_ssl"`
 }
 
 type RenewCertificatesResponse struct {

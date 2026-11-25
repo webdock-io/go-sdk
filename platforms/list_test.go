@@ -28,7 +28,7 @@ func TestListUsesCurrencyOption(t *testing.T) {
 	}
 }
 
-func TestListDefaultsCurrencyToEUR(t *testing.T) {
+func TestListOmitsCurrencyWhenUnset(t *testing.T) {
 	var gotQuery string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotQuery = r.URL.RawQuery
@@ -42,7 +42,7 @@ func TestListDefaultsCurrencyToEUR(t *testing.T) {
 	if err != nil {
 		t.Fatalf("List returned error: %v", err)
 	}
-	if gotQuery != "currency=EUR" {
-		t.Fatalf("query = %q, want currency=EUR", gotQuery)
+	if gotQuery != "" {
+		t.Fatalf("query = %q, want no query", gotQuery)
 	}
 }
