@@ -1,19 +1,5 @@
 # Webdock Go SDK
-
-A Go SDK for the [Webdock API](https://webdock.io/). It mirrors the Node SDK
-([`@webdock/sdk`](https://github.com/webdock-io/nodejs-sdk)) one to one: every
-Node method has a Go method at the same path, with Go casing.
-
-```ts
-// Node
-await client.servers.mail.improvmx.aliases.list({ serverSlug: "my-server" });
-```
-
-```go
-// Go
-wd.Servers.Mail.Improvmx.Aliases.List(ctx, mail.ServerOptions{ServerSlug: "my-server"})
-```
-
+ 
 Full reference: [pkg.go.dev](https://pkg.go.dev/github.com/webdock-io/go-sdk).
 
 ## Installation
